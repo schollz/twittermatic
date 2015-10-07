@@ -14,7 +14,56 @@ pip install -r requirements.txt
 
 ## Usage
 
+```python
+from lib import *
+bot = TwitterBot('config.json')
+bot.signin()
+bot.makefriends()
+bot.logout()
+```
 
+### Configuration file
+
+A typical configuration will look like
+
+```javascript
+{
+    "username": "YOUR LOGIN EMAIL", 
+    "password": "YOUR PASSWORD", 
+    "twittername": "YOUR TWITTER HANDLE", 
+    "topResults": true, 
+    "followingProbability": 100,
+    "replyProbability": 10, 
+    "favoritingProbability": 50, 
+    "retweetingProbability": 100, 
+    "avoid_words": [
+        "coders", 
+        "followers"
+    ], 
+    "search_expressions": [
+        "retweet to win", 
+        "retweet to enter contest", 
+        "RT for a chance to win", 
+        "RT to win", 
+        "RT to enter contest", 
+        "retweet for a chance to win"
+    ], 
+    "replies": [
+        "Sounds cool!", 
+        "Wow, really!? I'm down.", 
+        "Thanks, I'm going to try for it!", 
+        "Nice!", 
+        "LOL", 
+        ":)"
+    ], 
+    "search_avoid_words": [
+        "coder", 
+        "followers", 
+        "nothing", 
+        "thousand"
+    ]
+}
+```
 
 ## Contributing
 
