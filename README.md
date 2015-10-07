@@ -1,6 +1,6 @@
 # YATA (Yet Another Twitter Automator)
 
-This bot seeks to help users automate Twitter activities (friending, searching, unfollowing) *without the use of API keys!*. Instead, this bot is completely based of [Selenium for Python](https://github.com/SeleniumHQ/selenium).
+This bot seeks to help users automate Twitter activities (friending, searching, unfollowing) *without the use of API keys!* Instead, this bot is completely based of [Selenium for Python](https://github.com/SeleniumHQ/selenium).
 
 ## Installation
 
