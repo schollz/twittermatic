@@ -65,6 +65,7 @@ selenium_logger.setLevel(logging.WARNING)
 
 # Generic functions
 
+<<<<<<< HEAD
 
 
 '''
@@ -185,6 +186,11 @@ class TwitterBot(object):
                     tor (optional) - True/False for whether to use tor
         """
 
+        database.init_db()
+
+class TwitterBot(object):
+
+    def __init__(self, settingsFile, tor=False):
         database.init_db()
         self.settings = json.load(open(settingsFile, 'r'))
         self.settings['file'] = settingsFile
@@ -480,6 +486,9 @@ class TwitterBot(object):
 
         database_commands.add(handle, self.twittername)
 
+    def _processTweet(self, tweetbox):
+        #self.db.add(self.handle)
+        database_commands.add(handle, self.twittername)
         if random.randint(1, 100) <= self.settings['followingProbability']:
             try:
                 self._clickFollow(tweetbox)
