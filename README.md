@@ -44,7 +44,7 @@ bot.processFeed()
 
 Here is a list of the current public functions accessible from the ```TwitterBot``` class:
 
-```python
+```bash
     signin()              -   Signs in the user
     screenshot()          -   Takes screen shot
     unfollow()            -   Unfollows in bulk
