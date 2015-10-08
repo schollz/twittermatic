@@ -2,68 +2,61 @@
 
 This bot seeks to help users automate Twitter activities (friending, searching, unfollowing) *without the use of API keys!* Instead, this bot is completely based of [Selenium for Python](https://github.com/SeleniumHQ/selenium).
 
-## Installation
 
-Installation is easy, simply clone the repository and install the dependencies
+# Installation
 
 ```bash
-git clone https://github.com/schollz/twittermatic.git
-cd twittermatic/
 pip install -r requirements.txt
+```
+Copy the config file into the ```data``` folder and edit it with your login details:
+
+```bash
+cp default.json ./data/default.json
 ```
 
 ## Usage
 
+### Collect tweets from somebody
+
+The following code will collect someones tweets. It will run until it has found that it already collected that tweet, so on the first time it will take awhile especially if that perseon has a ton of tweets.
+
 ```python
 from lib import *
-bot = TwitterBot('config.json')
-bot.signin()
-bot.makefriends()
-bot.logout()
+
+bot = TwitterBot('default.json') # Load bot
+bot.collectTweets('scotus') 
 ```
 
-### Configuration file
+### Do a live search for #cats and retweet at those handles
 
-A typical configuration will look like
+This will go through and search for ```#cats``` and retweet, reply, and favorite the tweets depending on your set probabilities in ```default.json```.
 
-```javascript
-{
-    "username": "YOUR LOGIN EMAIL", 
-    "password": "YOUR PASSWORD", 
-    "twittername": "YOUR TWITTER HANDLE", 
-    "topResults": true, 
-    "followingProbability": 100,
-    "replyProbability": 10, 
-    "favoritingProbability": 50, 
-    "retweetingProbability": 100, 
-    "avoid_words": [
-        "coders", 
-        "followers"
-    ], 
-    "search_expressions": [
-        "retweet to win", 
-        "retweet to enter contest", 
-        "RT for a chance to win", 
-        "RT to win", 
-        "RT to enter contest", 
-        "retweet for a chance to win"
-    ], 
-    "replies": [
-        "Sounds cool!", 
-        "Wow, really!? I'm down.", 
-        "Thanks, I'm going to try for it!", 
-        "Nice!", 
-        "LOL", 
-        ":)"
-    ], 
-    "search_avoid_words": [
-        "coder", 
-        "followers", 
-        "nothing", 
-        "thousand"
-    ]
-}
+```python
+from lib import *
+
+bot = TwitterBot('default.json') # Load bot
+bot.liveSearch('#cats')
+bot.tweetboxes = self._loadAllTweets()
+bot.processFeed()
 ```
+
+
+## Known Issues
+
+- If you retweet, but you are blocked by that user, the program will stop (it will not be able to exit the message that you are blocked). 
+
+	Unfortunately, this happens too infrequently to be able to precisely evaluate and generate a work-around.
+
+## To-do
+
+- ~Simple generation of the settings file~
+- ~Multiple accounts per settings file~
+- ~Ability to iterate through all the current users~
+- ~Add in memory of persons previously replied to/favorited~
+- ~Add in the collector~
+- Set the hasHandle to only retrive ones in the last week
+- Add in callbacks for error handling
+- Add in timer functions to exit
 
 ## Contributing
 
@@ -104,4 +97,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-

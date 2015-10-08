@@ -1,0 +1,27 @@
+{
+   "username":"YOUR LOGIN",
+   "twittername":"YOUR TWITTER HANDLE",
+   "password":"YOUR PASSWORD",
+   "topResults":false,
+   "favoritingProbability":25,
+   "retweetingProbability":100,
+   "followingProbability":100
+   "replyProbability":10,
+   "subreddit":"aww",
+   "avoid_words":[
+      "puppy",
+      "dog"
+   ],
+   "search_expressions":[
+      "#cats"
+   ],
+   "replies":[
+      "cool!",
+      "Nice!",
+      "LOL",
+      ":)"
+   ],
+   "search_avoid_words":[
+      "digs"
+   ]
+}
