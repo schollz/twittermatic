@@ -417,7 +417,7 @@ class TwitterBot(object):
 
             self.handle = self._getTweetHandle(tweetbox)
             if self.handle is not None:
-                if database_commands.hasHandle(self.handle, self.twittername) #self.db.hasHandle(self.handle):
+                if database_commands.hasHandle(self.handle, self.twittername): #self.db.hasHandle(self.handle):
                     dontEngage = True
                 if not dontEngage:
                     problem = self._processTweet(tweetbox)

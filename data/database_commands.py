@@ -70,6 +70,7 @@ def get_tweet_by_handle(handle):
 
 
 
+
 def hasHandle(repliedhandle, twittername):
     query = session.query(Tweet).filter(Tweet.repliedhandle == repliedhandle).filter(Tweet.twittername == twittername)
     results = query.all()
@@ -97,12 +98,13 @@ def addRetweet(repliedhandle, tweet, twittername):
 
 def insertTweet(tweet, skipDuplicates=True):
     try:
+        print(tweet)
         retweet = Tweet(
             twitter_handle=tweet['handle'], 
             tweet_time=datetime.datetime.utcfromtimestamp(str(tweet['time'])), 
             tweet_text=tweet['text'], 
             data_type=tweet['type'], 
-            data_id=tweet['itemid'], 
+            data_id=int(tweet['itemid']), 
             retweets=tweet['retweets'], 
             favorites=tweet['favorites'], 
             status=None
@@ -110,8 +112,9 @@ def insertTweet(tweet, skipDuplicates=True):
         session.add(retweet)
         session.commit()
         return True
-    except:
+    except Exception as e:
         print("ERROR OCCURED WHEN INSERTING TWEET")
+        print(e)
         session.rollback()
         return False
 
