@@ -317,23 +317,21 @@ class TwitterBot(object):
         lastNumBoxes = 0
         self.tweetboxes = self._loadAllTweets(numTimes=1)
         numBoxes = len(self.tweetboxes)
-        while lastNumBoxes != numBoxes:
-            while boxInd < len(self.tweetboxes):
+        inserted = True
+        while lastNumBoxes != numBoxes and inserted:
+            while boxInd < len(self.tweetboxes) and inserted:
                 tweetbox = self.tweetboxes[boxInd]
                 tweet = self._getTweetStats(tweetbox)
                 tweet['handle'] = twitterhandle
                 inserted = self.db.insertTweet(tweet)
-                if not inserted:
-                    break
-                else:
-                    boxInd += 1
-            self.tweetboxes = self._loadAllTweets(numTimes=5)
-            lastNumBoxes = numBoxes
-            numBoxes = len(self.tweetboxes)
-            print(lastNumBoxes,numBoxes,boxInd)
+                boxInd += 1
+            if inserted:
+                self.tweetboxes = self._loadAllTweets(numTimes=5)
+                lastNumBoxes = numBoxes
+                numBoxes = len(self.tweetboxes)
 
 
-        self.logger.info('Inserted ' + str(boxInd) + ' tweets for ' + twitterhandle)
+        self.logger.info('Inserted ' + str(boxInd-1) + ' tweets for ' + twitterhandle)
 
 
     def _getTweetStats(self,tweetbox):
