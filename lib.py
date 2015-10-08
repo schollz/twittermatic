@@ -44,6 +44,7 @@ from datetime import datetime, timedelta
 import praw
 
 import data.database as database
+import data.database_commands as database_commands
 
 # set up logging to file - see previous section for more details
 logging.basicConfig(level=logging.DEBUG,
@@ -79,7 +80,7 @@ def convertCondensedNum(strnum):
 
 
 
-
+'''
 class Database(object):
 
     def __init__(self, twittername):
@@ -166,7 +167,7 @@ class Database(object):
             self.c.execute(cmd)
             self.conn.commit()
             return True
-
+'''
 
 
 
@@ -181,7 +182,8 @@ class TwitterBot(object):
         self.tor = tor
         self.logger = logging.getLogger(self.settings['file'])
         self.signedIn = False
-        self.db = Database(self.settings['twittername'])
+        #self.db = Database(self.settings['twittername'])
+        self.twittername = self.settings['twittername']
         self.logger.debug('Initialized')
 
     def screenshot(self, filename=None):
@@ -343,7 +345,7 @@ class TwitterBot(object):
                 tweetbox = self.tweetboxes[boxInd]
                 tweet = self._getTweetStats(tweetbox)
                 tweet['handle'] = twitterhandle
-                inserted = self.db.insertTweet(tweet)
+                inserted = database_commands.insertTweet(tweet) #self.db.insertTweet(tweet)
                 boxInd += 1
             if inserted:
                 self.tweetboxes = self._loadAllTweets(numTimes=5)
@@ -415,7 +417,7 @@ class TwitterBot(object):
 
             self.handle = self._getTweetHandle(tweetbox)
             if self.handle is not None:
-                if self.db.hasHandle(self.handle):
+                if database_commands.hasHandle(self.handle, self.twittername) #self.db.hasHandle(self.handle):
                     dontEngage = True
                 if not dontEngage:
                     problem = self._processTweet(tweetbox)
@@ -425,7 +427,8 @@ class TwitterBot(object):
                     self.logger.info('Already interacted with ' + self.handle)
 
     def _processTweet(self, tweetbox):
-        self.db.add(self.handle)
+        #self.db.add(self.handle)
+        database_commands.add(handle, self.twittername)
         if random.randint(1, 100) <= self.settings['followingProbability']:
             self._clickFollow(tweetbox)
         if random.randint(1, 100) <= self.settings['favoritingProbability']:
@@ -536,7 +539,8 @@ class TwitterBot(object):
                     retweet_box, 100, 0)
                 Hover.perform()
                 self.logger.debug('Retweeted ' + self.handle)
-                self.db.addRetweet(self.handle, self._getTweetText(tweetbox))
+                #self.db.addRetweet(self.handle, self._getTweetText(tweetbox))
+                database_commands.addRetweet(self.handle, self._getTweetText(tweetbox), self.twittername)
                 sleep(0.1)
                 try:
                     css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'

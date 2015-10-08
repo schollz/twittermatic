@@ -109,7 +109,9 @@ def insertTweet(tweet, skipDuplicates=True):
         )
         session.add(retweet)
         session.commit()
+        return True
     except:
         print("ERROR OCCURED WHEN INSERTING TWEET")
         session.rollback()
+        return False
 
