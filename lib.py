@@ -751,4 +751,12 @@ for f in getConfigFiles():
     print f
     bots.append(TwitterBot(f))
 bots[0].collectTweets('lessig')
+
+
+python
+from lib import *
+bot = TwitterBot('stefans.json')
+bot.collectTweets('scotus')
+
+
 '''

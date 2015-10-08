@@ -1,5 +1,6 @@
 import logging
 import datetime
+import traceback
 from data.models import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -100,13 +101,14 @@ def addRetweet(repliedhandle, tweet, twittername):
 
 def insertTweet(tweet, skipDuplicates=True):
     try:
-        print(tweet)
+        #for item in tweet:
+        #    print(item,type(tweet[item]),tweet[item])
         retweet = Tweet(
             twitter_handle=tweet['handle'], 
-            tweet_time=datetime.datetime.utcfromtimestamp(str(tweet['time'])), 
+            tweet_time=datetime.datetime.utcfromtimestamp(tweet['time']), 
             tweet_text=tweet['text'], 
             data_type=tweet['type'], 
-            data_id=int(tweet['itemid']), 
+            data_id=tweet['itemid'], 
             retweets=tweet['retweets'], 
             favorites=tweet['favorites'], 
             status=None
@@ -115,6 +117,8 @@ def insertTweet(tweet, skipDuplicates=True):
         session.commit()
         return True
     except Exception as e:
+        traceback.print_exc()
+        traceback.print_stack()
         print("ERROR OCCURED WHEN INSERTING TWEET")
         print(e)
         session.rollback()

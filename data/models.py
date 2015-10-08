@@ -1,4 +1,4 @@
-
+import datetime
 from data.database import Base
 from sqlalchemy import ForeignKey
 from sqlalchemy import Column, Integer, String, DateTime
@@ -21,10 +21,10 @@ class Tweet(Base):
         self.tweet_time = tweet_time
         self.text = tweet_text
         self.type = data_type
-        self.itemid = data_id
-        self.retweets = retweets
-        self.favorites = favorites
-        self.status = status
+        self.itemid = str(data_id)
+        self.retweets = int(retweets)
+        self.favorites = int(favorites)
+        self.status = 1
         #Timestamp = Column(DateTime, unique=False)
 
     def __repr__(self):
