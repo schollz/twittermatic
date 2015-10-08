@@ -1,3 +1,4 @@
+
 import logging
 import datetime
 import traceback
@@ -12,44 +13,6 @@ engine = create_engine('sqlite:///data/tweets.db', echo=False)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-
-import os
-import csv
-
-def create_tweet(**kwargs):
-    """ Creates a user and assigns it to a group """
-    logger = logging.getLogger('DatabaseCommands.create_tweet')
-    logger.info("Saving tweet to database")
-    query = session.query(Tweet).filter(Tweet.data_id == kwargs['data_id'])
-    if len(query.all()) == 0:
-        dt = datetime.datetime.utcfromtimestamp(kwargs['tweet_time'])
-        try:
-            tweet = Tweet(
-                            twitter_handle=kwargs['twitter_handle'], 
-                            tweet_time=dt, 
-                            tweet_text=kwargs['tweet_text'], 
-                            data_type=kwargs['data_type'], 
-                            data_id=kwargs['data_id'],
-                            status=kwargs['status']
-                        )
-            session.add(tweet)
-            session.commit()
-            logger.info("Saved tweet " + str(kwargs['data_id']) + " to database")
-            logger.debug("twitter_handle = " + str(kwargs['twitter_handle']))
-            logger.debug("tweet_time = " + str(kwargs['tweet_time']))
-            logger.debug("tweet_text = " + str(kwargs['tweet_text']))
-            logger.debug("data_type = " + str(kwargs['data_type']))
-            logger.debug("data_id = " + str(kwargs['data_id']))
-            logger.debug("status = " + str(kwargs['status']))
-            return True
-        except Exception as e:
-            print(e)
-            session.rollback()
-            logger.error("Error occurred saving tweet " + kwargs['data_id'] + " to database")
-            logging.error(e)
-            return False
-    else:
-        logger.warning("Tweet " + kwargs['data_id'] + " already exists")
 
 def get_tweet_by_id(tweet_id):
     """ Get Tweet by ID """
@@ -67,11 +30,6 @@ def get_tweet_by_handle(handle):
     query = session.query(Tweet).filter(Tweet.twitter_handle == handle)
     results = query.all()
     return results
-
-
-
-
-
 
 
 
