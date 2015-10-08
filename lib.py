@@ -329,10 +329,9 @@ class TwitterBot(object):
         return tweet
 
     def liveSearch(self, search_term):
-        """Gets Tweet information
+        """Search for tweets
         
             @param search_term     {String} search term
-            @returns ???           {Dict} contains tweet text, time, type, itemid, favorites, retweets
         """
         if not self.signedIn:
             self.signin()
@@ -385,6 +384,11 @@ class TwitterBot(object):
                     self.logger.info('Already interacted with ' + self.handle)
 
     def _processTweet(self, tweetbox):
+        """Process Tweet for stuff?????
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+            @returns True/False {Boolean} 
+        """
         self.driver.execute_script(
                 "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
 
@@ -412,6 +416,11 @@ class TwitterBot(object):
         return False
 
     def _getTweetText(self, tweetbox):
+        """Gets tweet text
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+            @returns tweet_text {String} tweet text
+        """
         tweet = tweetbox.find_element(By.TAG_NAME, "div")
         tweet = tweet.find_element(By.CSS_SELECTOR, "div.content")
         tweet_text = tweet.find_element(
@@ -421,6 +430,11 @@ class TwitterBot(object):
         return tweet_text
 
     def _getTweetTime(self, tweetbox):
+        """Gets tweet timestamp
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+            @returns tweet_time {Integer} unix timestamp for tweet creation
+        """
         tweet = tweetbox.find_element(By.TAG_NAME, "div")
         tweet = tweet.find_element(By.CSS_SELECTOR, "div.content")
         tweet_time = tweet.find_element(
@@ -434,6 +448,11 @@ class TwitterBot(object):
         return tweet_time
 
     def _getTweetHandle(self, tweetbox):
+        """Gets tweets user handle
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+            @returns text       {String} users handler
+        """
         #for text in unidecode(tweetbox.text).split():
         for text in tweetbox.text.split():
             if '@' in text and len(text) > 4:
@@ -441,6 +460,10 @@ class TwitterBot(object):
         return None
 
     def _clickTweetBox(self, tweetbox):
+        """Clicks on tweet element
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+        """
         self.logger.info('Clicking ' + tweetbox.text.split('\n')[0])
         clickSuccess = False
         try:
@@ -478,6 +501,10 @@ class TwitterBot(object):
                 pass
 
     def _clickFavorite(self, tweetbox):
+        """Favorites a tweet
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+        """
         css = '.' + \
             'ProfileTweet-actionButton ProfileTweet-follow-button js-tooltip'.replace(
                 ' ', ',')
@@ -490,6 +517,10 @@ class TwitterBot(object):
                 self.logger.debug('Favorited ' + self.handle)
 
     def _clickRetweet(self, tweetbox):
+        """Retweets a tweet
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+        """
         css = '.' + \
             'ProfileTweet-actionButton ProfileTweet-follow-button js-tooltip'.replace(
                 ' ', ',')
@@ -519,6 +550,10 @@ class TwitterBot(object):
                     return True
 
     def _clickReply(self, tweetbox):
+        """Replies to a tweet
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+        """
         css = '.' + \
             'ProfileTweet-actionButton ProfileTweet-follow-button js-tooltip'.replace(
                 ' ', ',')
@@ -549,6 +584,8 @@ class TwitterBot(object):
         First hover over user name
         Then float cursor over to the follow button
         Then press it
+
+            @param tweetbox     {WebElement} Selenium element of tweet
         """
         # First get into view
         self.driver.execute_script(
@@ -625,7 +662,11 @@ class TwitterBot(object):
                     sleep(.5)
 
     def _typeLikeHuman(self, element, text, enter=False):
-        """Types slowly like a human would"""
+        """Types slowly like a human would
+
+            @param element      {WebElement} element to 'type' charaters
+            @param enter        {Boolean} send characters
+        """
         for letter in text:
             element.send_keys(letter)
             sleep(float(random.randint(1, 100)) / 200.0)
@@ -633,6 +674,10 @@ class TwitterBot(object):
             element.send_keys(Keys.RETURN)
 
     def tweet(self, text):
+        """Sends a tweet
+
+            @param text         {String} tweet text
+        """
         self.driver.get("http://www.twitter.com/")
         css = '.' + 'tweet-box rich-editor notie'.replace(' ', '.')
         twitterbox = self.driver.find_elements(By.CSS_SELECTOR, css)
@@ -653,7 +698,7 @@ class TwitterBot(object):
     def generateTweet(self,subreddit=None):
         """Generates tweet based on something in a Reddit subreddit
         
-        Input:  subreddit (optional) - if not used, the config settings will be used
+            @param subreddit    {???} if not used, the config settings will be used
         """
         if not self.signedIn:
             self.signin()
