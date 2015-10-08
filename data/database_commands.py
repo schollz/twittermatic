@@ -40,7 +40,7 @@ def hasHandle(repliedhandle, twittername):
     return len(results) > 0
 
 def add(repliedhandle, twittername):
-    if not hasHandle(handle):
+    if not hasHandle(repliedhandle, twittername):
         try:
             cache = Cache(twittername,repliedhandle)
             session.add(cache)

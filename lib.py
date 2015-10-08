@@ -65,9 +65,6 @@ selenium_logger.setLevel(logging.WARNING)
 
 # Generic functions
 
-<<<<<<< HEAD
-
-
 '''
 class Database(object):
 
@@ -484,11 +481,7 @@ class TwitterBot(object):
         self.driver.execute_script(
                 "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
 
-        database_commands.add(handle, self.twittername)
-
-    def _processTweet(self, tweetbox):
-        #self.db.add(self.handle)
-        database_commands.add(handle, self.twittername)
+        database_commands.add(self.handle, self.twittername)
         if random.randint(1, 100) <= self.settings['followingProbability']:
             try:
                 self._clickFollow(tweetbox)
