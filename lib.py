@@ -25,13 +25,11 @@ Notes:
 import random
 import json
 import os
-#import sys
-#import pickle
-#import traceback
 import re
 import logging
 from os import walk
 from time import sleep, time
+import multiprocessing
 
 import sqlite3
 from selenium import webdriver
@@ -39,8 +37,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime, timedelta
-#from unidecode import unidecode
-#import stopit
 import praw
 
 
@@ -206,7 +202,6 @@ class TwitterBot(object):
         """
         self.profile = webdriver.FirefoxProfile()
         self.driver = webdriver.Firefox(self.profile)
-        self.driver.maximize_window()
 
         user = self.settings['username']
         psw = self.settings['password']
@@ -450,6 +445,9 @@ class TwitterBot(object):
         self.logger.debug(self.driver.current_url)
         if 'search' not in self.driver.current_url and search_term.split()[0] not in self.driver.current_url:
             self.logger.error('Problem with searching')
+            
+        self.driver.find_element_by_css_selector(
+                '.AdaptiveSearchTitle-title').click()
 
     def processFeed(self):
         for tweetbox in self.tweetboxes:
@@ -475,23 +473,33 @@ class TwitterBot(object):
                     dontEngage = True
                 if not dontEngage:
                     problem = self._processTweet(tweetbox)
-                    if problem:
-                        return False
                 else:
                     self.logger.info('Already interacted with ' + self.handle)
 
     def _processTweet(self, tweetbox):
+        self.driver.execute_script(
+                "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
         self.db.add(self.handle)
         if random.randint(1, 100) <= self.settings['followingProbability']:
-            self._clickFollow(tweetbox)
+            try:
+                self._clickFollow(tweetbox)
+            except:
+                self.logger.error('Error following!')
         if random.randint(1, 100) <= self.settings['favoritingProbability']:
-            self._clickFavorite(tweetbox)
+            try:
+                self._clickFavorite(tweetbox)
+            except:
+                self.logger.error('Error favoriting!')
         if random.randint(1, 100) <= self.settings['retweetingProbability']:
-            problem = self._clickRetweet(tweetbox)
-            if problem:
-                return False
+            try:
+                self._clickRetweet(tweetbox)
+            except:
+                self.logger.error('Error retweeting!')
         if random.randint(1, 100) <= self.settings['replyProbability']:
-            self._clickReply(tweetbox)
+            try:
+                self._clickReply(tweetbox)
+            except:
+                self.logger.error('Error replying!')
         return False
 
     def _getTweetText(self, tweetbox):
@@ -581,18 +589,16 @@ class TwitterBot(object):
         for button in buttons:
             if ("Retweet" in button.text):
                 button.click()
-                sleep(0.1)
+                sleep(0.5)
                 css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
                 css = '.' + css.replace(' ', '.')
                 retweet_box = self.driver.find_element(By.CSS_SELECTOR, css)
                 css = '.btn.primary-btn.retweet-action'
+                sleep(0.5)
                 retweet_box.find_element(By.CSS_SELECTOR, css).click()
-                Hover = ActionChains(self.driver).move_to_element_with_offset(
-                    retweet_box, 100, 0)
-                Hover.perform()
                 self.logger.debug('Retweeted ' + self.handle)
                 self.db.addRetweet(self.handle, self._getTweetText(tweetbox))
-                sleep(0.1)
+                sleep(0.5)
                 try:
                     css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
                     css = 'Icon Icon--close Icon--medium dismissIcon Icon--close Icon--medium dismiss'
@@ -617,18 +623,16 @@ class TwitterBot(object):
             By.CSS_SELECTOR, ".tweet-box.rich-editor.notie")
         thereply = random.choice(self.settings['replies'])
         textbox.send_keys(thereply)
-        sleep(0.1)
+        sleep(0.3)
         twitter_button = tweetbox.find_element(
             By.CSS_SELECTOR, ".btn.primary-btn.tweet-action.tweet-btn.js-tweet-btn")
         twitter_button.click()
-        sleep(0.2)
+        sleep(0.5)
         responses = self.driver.find_elements(By.CSS_SELECTOR, ".message-text")
         for response in responses:
             self.logger.debug('Response to reply: ' + response.text)
         self.logger.info('Replied to ' + self.handle)
-        sleep(0.1)
-
-        self._clickTweetBox(tweetbox)
+        sleep(0.3)
 
     def _clickFollow(self, tweetbox):
         """Click the follow button
@@ -647,7 +651,7 @@ class TwitterBot(object):
         profile_text = tweetbox.find_elements(By.CSS_SELECTOR, css)[0]
         Hover = ActionChains(self.driver).move_to_element(profile_text)
         Hover.perform()
-        sleep(0.5)
+        sleep(1)
         try:
             css = '.' + \
                 'profile-card ProfileCard with-banner component profile-header hovercard gravity-south weight-left'.replace(
@@ -665,20 +669,20 @@ class TwitterBot(object):
             pass
 
         try:
-            sleep(0.1)
+            sleep(0.5)
             #if (' not-following' in unidecode(container.get_attribute("innerHTML"))):
             if (' not-following' in container.get_attribute("innerHTML")):
-                sleep(0.1)
+                sleep(0.5)
                 css = '.' + \
                     'user-actions-follow-button js-follow-btn follow-button btn small small-follow-btn'.replace(
                         ' ', ',')
                 follow_button = container.find_elements(
                     By.CSS_SELECTOR, css)[0]
                 follow_button.click()
-                sleep(0.1)
+                sleep(0.5)
 
             Hover = ActionChains(self.driver).move_to_element_with_offset(
-                profile_text, -100, 0)
+                profile_text, 10, 10)
             Hover.perform()
             self.logger.debug('Followed ' + self.handle)
         except:
@@ -822,8 +826,8 @@ bots[0].collectTweets('lessig')
 '''
 
 
-'''
+
 bot = TwitterBot('default2.json')
 bot.makefriends()
-'''
+
 
