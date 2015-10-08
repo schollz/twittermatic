@@ -600,7 +600,7 @@ class TwitterBot(object):
                 retweet_box.find_element(By.CSS_SELECTOR, css).click()
                 self.logger.debug('Retweeted ' + self.handle)
                 database_commands.addRetweet(self.handle, self._getTweetText(tweetbox), self.twittername)
-                sleep(0.1)
+                sleep(0.5)
                 try:
                     css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
                     css = 'Icon Icon--close Icon--medium dismissIcon Icon--close Icon--medium dismiss'
@@ -621,11 +621,11 @@ class TwitterBot(object):
             if ("Reply" in button.text):
                 button.click()
 
+        sleep(0.5)
         textbox = tweetbox.find_element(
             By.CSS_SELECTOR, ".tweet-box.rich-editor.notie")
         thereply = random.choice(self.settings['replies'])
         textbox.send_keys(thereply)
-        sleep(0.3)
         twitter_button = tweetbox.find_element(
             By.CSS_SELECTOR, ".btn.primary-btn.tweet-action.tweet-btn.js-tweet-btn")
         twitter_button.click()
