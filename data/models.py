@@ -34,7 +34,7 @@ class Cache(Base):
     __tablename__ = 'cache'
     id = Column(Integer, primary_key=True)
     twittername = Column(String(50), unique=False)
-    repliedhandle = Column(String(50), unique=False)
+    repliedhandle = Column(String(50), unique=True)
     #Timestamp = Column(DateTime, unique=False)
 
     def __init__(self, twittername=None, repliedhandle=None):
@@ -45,7 +45,7 @@ class Cache(Base):
         return '<Cache %r>' % (self.repliedhandle)
 
 
-class Retweets(Base):
+class Retweet(Base):
     __tablename__ = 'retweets'
     id = Column(Integer, primary_key=True)
     twittername = Column(String(50), unique=False)

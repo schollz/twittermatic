@@ -43,6 +43,7 @@ from datetime import datetime, timedelta
 #import stopit
 import praw
 
+import data.database as database
 
 # set up logging to file - see previous section for more details
 logging.basicConfig(level=logging.DEBUG,
@@ -75,6 +76,8 @@ def convertCondensedNum(strnum):
         return int(1000000 * float(strnum.split('M')[0]))
     else:
         return int(strnum)
+
+
 
 
 class Database(object):
@@ -166,9 +169,13 @@ class Database(object):
 
 
 
+
+
+
 class TwitterBot(object):
 
     def __init__(self, settingsFile, tor=False):
+        database.init_db()
         self.settings = json.load(open(settingsFile, 'r'))
         self.settings['file'] = settingsFile
         self.tor = tor

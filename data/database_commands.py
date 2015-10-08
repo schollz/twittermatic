@@ -70,62 +70,46 @@ def get_tweet_by_handle(handle):
 
 
 
+def hasHandle(repliedhandle, twittername):
+    query = session.query(Tweet).filter(Tweet.repliedhandle == repliedhandle).filter(Tweet.twittername == twittername)
+    results = query.all()
+    return len(results) > 0
 
-
-'''
-
-
-    def add(self, handle):
-        if not self.hasHandle(handle):
-            cmd = """INSERT INTO cache (twittername,repliedhandle) VALUES ('%s','%s')""" % (
-                self.twittername, handle)
-            self.c.execute(cmd)
-            self.conn.commit()
-
-    def addRetweet(self, handle, tweet):
+def add(repliedhandle, twittername):
+    if not hasHandle(handle):
         try:
-            cmd = """INSERT INTO retweets (twittername,repliedhandle,tweet) VALUES ('%s','%s','%s')""" % (
-                self.twittername, handle, tweet.replace("'", "''"))
-            self.c.execute(cmd)
-            self.conn.commit()
+            cache = Cache(twittername,repliedhandle)
+            session.add(cache)
+            session.commit()
         except:
-            print("ERROR OCCURED WHEN INSERTING TWEET")
+            print("ERROR WRITING CACHE")
+            session.rollback()
 
-    def hasHandle(self, handle):
-        cmd = """SELECT repliedhandle FROM cache WHERE repliedhandle LIKE '%s' and twittername like '%s' LIMIT 1""" % (
-            handle, self.twittername)
-        self.c.execute(cmd)
-        foundOne = False
-        for row in self.c.fetchall():
-            foundOne = True
-            break
-        return foundOne
-
-    def hasTweet(self, tweet):
-        cmd = """SELECT * FROM tweets WHERE handle LIKE '%s' and text like '%s' and tweet_time = %s LIMIT 1""" % (
-            tweet['handle'], tweet['text'], str(tweet['time']))
-        self.c.execute(cmd)
-        foundOne = False
-        for row in self.c.fetchall():
-            foundOne = True
-            break
-        return foundOne
-
-    def insertTweet(self, tweet, skipDuplicates=True):
-        tweet['text'] = tweet['text'].replace("'", "''")
-        if (self.hasTweet(tweet) and skipDuplicates):
-            self.logger.info('Have rest of tweets for ' + tweet['handle'])
-            return False
-        else:
-            cmd = """INSERT INTO tweets (handle,text,tweet_time,retweets,favorites,type,itemid) VALUES ('%s','%s',%s,%s,%s,'%s',%s)""" % (
-                tweet['handle'], tweet['text'], str(tweet['time']), str(tweet['retweets']), str(tweet['favorites']), str(tweet['type']), str(tweet['itemid']))
-            self.logger.info(cmd)
-            self.c.execute(cmd)
-            self.conn.commit()
-            return True
+def addRetweet(repliedhandle, tweet, twittername):
+    try:
+        retweet = Retweet(twittername,repliedhandle,tweet)
+        session.add(retweet)
+        session.commit()
+    except:
+        print("ERROR OCCURED WHEN INSERTING RETWEET")
+        session.rollback()
 
 
+def insertTweet(tweet, skipDuplicates=True):
+    try:
+        retweet = Tweet(
+            twitter_handle=tweet['handle'], 
+            tweet_time=datetime.datetime.utcfromtimestamp(str(tweet['time'])), 
+            tweet_text=tweet['text'], 
+            data_type=tweet['type'], 
+            data_id=tweet['itemid'], 
+            retweets=tweet['retweets'], 
+            favorites=tweet['favorites'], 
+            status=None
+        )
+        session.add(retweet)
+        session.commit()
+    except:
+        print("ERROR OCCURED WHEN INSERTING TWEET")
+        session.rollback()
 
-
-
-'''
