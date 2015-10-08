@@ -33,7 +33,7 @@ import logging
 from os import walk
 from time import sleep, time
 
-import sqlite3
+#import sqlite3
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -43,6 +43,7 @@ from datetime import datetime, timedelta
 #import stopit
 import praw
 
+import utils
 import data.database as database
 import data.database_commands as database_commands
 
@@ -67,16 +68,6 @@ selenium_logger = logging.getLogger(
 selenium_logger.setLevel(logging.WARNING)
 
 # Generic functions
-
-
-def convertCondensedNum(strnum):
-    strnum = str(strnum)
-    if 'K' in strnum:
-        return int(1000 * float(strnum.split('K')[0]))
-    elif 'M' in strnum:
-        return int(1000000 * float(strnum.split('M')[0]))
-    else:
-        return int(strnum)
 
 
 
@@ -363,12 +354,12 @@ class TwitterBot(object):
         tweet['itemid'] = tweetbox.get_attribute("data-item-id")
         words = tweetbox.text.split('\n')
         try:
-            tweet['favorites'] = convertCondensedNum(
+            tweet['favorites'] = utils.convertCondensedNum(
                 words[words.index('Retweet') + 1])
         except:
             tweet['favorites'] = -1
         try:
-            tweet['retweets'] = convertCondensedNum(
+            tweet['retweets'] = utils.convertCondensedNum(
                 words[words.index('Favorite') + 1])
         except:
             tweet['retweets'] = -1
