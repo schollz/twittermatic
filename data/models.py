@@ -14,7 +14,7 @@ class Tweet(Base):
     retweets = Column(Integer, unique=False)
     favorites = Column(Integer, unique=False)
     status = Column(Integer, unique=False)
-    Timestamp =Column(DateTime, onupdate=datetime.datetime.now)
+    Timestamp =Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     def __init__(self, twitter_handle=None, tweet_time=None, tweet_text=None, data_type=None, data_id=None, retweets=None, favorites=None, status=None):
         self.handle = twitter_handle
@@ -24,7 +24,7 @@ class Tweet(Base):
         self.itemid = str(data_id)
         self.retweets = int(retweets)
         self.favorites = int(favorites)
-        self.status = 1
+        self.status = status
         #Timestamp = Column(DateTime, unique=False)
 
     def __repr__(self):
@@ -36,7 +36,7 @@ class Cache(Base):
     id = Column(Integer, primary_key=True)
     twittername = Column(String(50), unique=False)
     repliedhandle = Column(String(50), unique=False)
-    Timestamp =Column(DateTime, onupdate=datetime.datetime.now)
+    Timestamp =Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     def __init__(self, twittername=None, repliedhandle=None):
         self.twittername = twittername
@@ -52,7 +52,7 @@ class Retweet(Base):
     twittername = Column(String(50), unique=False)
     repliedhandle = Column(String(50), unique=False)
     text = Column(String(150), unique=False)
-    Timestamp =Column(DateTime, onupdate=datetime.datetime.now)
+    Timestamp =Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     def __init__(self, twittername=None, repliedhandle=None, text=None):
         self.twittername = twittername

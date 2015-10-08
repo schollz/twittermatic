@@ -71,7 +71,7 @@ def insertTweet(tweet, skipDuplicates=True):
             data_id=tweet['itemid'], 
             retweets=tweet['retweets'], 
             favorites=tweet['favorites'], 
-            status=None
+            status=1
         )
         session.add(retweet)
         session.commit()
