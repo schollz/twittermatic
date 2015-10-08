@@ -31,7 +31,7 @@ from os import walk
 from time import sleep, time
 import multiprocessing
 
-import sqlite3
+#import sqlite3
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -39,6 +39,9 @@ from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime, timedelta
 import praw
 
+import utils
+import data.database as database
+import data.database_commands as database_commands
 
 # set up logging to file - see previous section for more details
 logging.basicConfig(level=logging.DEBUG,
@@ -63,16 +66,8 @@ selenium_logger.setLevel(logging.WARNING)
 # Generic functions
 
 
-def convertCondensedNum(strnum):
-    strnum = str(strnum)
-    if 'K' in strnum:
-        return int(1000 * float(strnum.split('K')[0]))
-    elif 'M' in strnum:
-        return int(1000000 * float(strnum.split('M')[0]))
-    else:
-        return int(strnum)
 
-
+'''
 class Database(object):
 
     def __init__(self, twittername):
@@ -159,6 +154,9 @@ class Database(object):
             self.c.execute(cmd)
             self.conn.commit()
             return True
+'''
+
+
 
 
 
@@ -186,12 +184,14 @@ class TwitterBot(object):
         Inputs:     settingsFiles - name of settings file
                     tor (optional) - True/False for whether to use tor
         """
+
+        database.init_db()
         self.settings = json.load(open(settingsFile, 'r'))
         self.settings['file'] = settingsFile
         self.tor = tor
         self.logger = logging.getLogger(self.settings['file'])
         self.signedIn = False
-        self.db = Database(self.settings['twittername'])
+        self.twittername = self.settings['twittername']
         self.logger.debug('Initialized')
 
     def signin(self):
@@ -384,7 +384,7 @@ class TwitterBot(object):
                 tweetbox = self.tweetboxes[boxInd]
                 tweet = self._getTweetStats(tweetbox)
                 tweet['handle'] = twitterhandle
-                inserted = self.db.insertTweet(tweet)
+                inserted = database_commands.insertTweet(tweet) 
                 boxInd += 1
             if inserted:
                 self.tweetboxes = self._loadAllTweets(numTimes=5)
@@ -407,12 +407,12 @@ class TwitterBot(object):
         tweet['itemid'] = tweetbox.get_attribute("data-item-id")
         words = tweetbox.text.split('\n')
         try:
-            tweet['favorites'] = convertCondensedNum(
+            tweet['favorites'] = utils.convertCondensedNum(
                 words[words.index('Retweet') + 1])
         except:
             tweet['favorites'] = -1
         try:
-            tweet['retweets'] = convertCondensedNum(
+            tweet['retweets'] = utils.convertCondensedNum(
                 words[words.index('Favorite') + 1])
         except:
             tweet['retweets'] = -1
@@ -452,7 +452,6 @@ class TwitterBot(object):
     def processFeed(self):
         for tweetbox in self.tweetboxes:
             self.tweetbox = tweetbox
-            #tweetbox_text = unidecode(tweetbox.text).split()
             tweetbox_text = tweetbox.text.split()
             twitter_handles = []
             all_twitter_handles = []
@@ -461,7 +460,6 @@ class TwitterBot(object):
             # check if you need to avoid this person
             if not dontEngage:
                 for word in self.settings['avoid_words']:
-                    #if word in unidecode(tweetbox.text).lower():
                     if word in tweetbox.text.lower():
                         dontEngage = True
                         self.logger.info("need to avoid " + word)
@@ -469,7 +467,7 @@ class TwitterBot(object):
 
             self.handle = self._getTweetHandle(tweetbox)
             if self.handle is not None:
-                if self.db.hasHandle(self.handle):
+                if database_commands.hasHandle(self.handle, self.twittername): 
                     dontEngage = True
                 if not dontEngage:
                     problem = self._processTweet(tweetbox)
@@ -479,7 +477,9 @@ class TwitterBot(object):
     def _processTweet(self, tweetbox):
         self.driver.execute_script(
                 "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
-        self.db.add(self.handle)
+
+        database_commands.add(handle, self.twittername)
+
         if random.randint(1, 100) <= self.settings['followingProbability']:
             try:
                 self._clickFollow(tweetbox)
@@ -597,8 +597,8 @@ class TwitterBot(object):
                 sleep(0.5)
                 retweet_box.find_element(By.CSS_SELECTOR, css).click()
                 self.logger.debug('Retweeted ' + self.handle)
-                self.db.addRetweet(self.handle, self._getTweetText(tweetbox))
-                sleep(0.5)
+                database_commands.addRetweet(self.handle, self._getTweetText(tweetbox), self.twittername)
+                sleep(0.1)
                 try:
                     css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
                     css = 'Icon Icon--close Icon--medium dismissIcon Icon--close Icon--medium dismiss'
@@ -823,6 +823,14 @@ for f in getConfigFiles():
     print f
     bots.append(TwitterBot(f))
 bots[0].collectTweets('lessig')
+
+
+python
+from lib import *
+bot = TwitterBot('stefans.json')
+bot.collectTweets('scotus')
+
+
 '''
 
 
