@@ -167,8 +167,29 @@ class Database(object):
 
 
 class TwitterBot(object):
+    """TwitterBot object
+    
+    Public Methods:
+    
+    signin()              -   Signs in the user
+    screenshot()          -   Takes screen shot
+    unfollow()            -   Unfollows in bulk
+    followback()          -   Follow back in bulk
+    collectTweets(handle) -   Collects tweets for the given handle
+    liveSearch(term)      -   Loads all the tweets that match search term
+    processFeed()         -   After using liveSearch(term) you can use this to process the tweets in feed
+    makefriends()         -   Follow/Favorite/Reply/Retweet in bulk using search terms (does liveSearch + processFeed)
+    tweet(text)           -   Tweets the given text
+    generateTweet(subreddt) - Generates a tweet from something "hot" in that subreddit
+    logout()              -   Signs out and closes down driver
+    """
 
     def __init__(self, settingsFile, tor=False):
+        """Initialize Twitter bot
+
+        Inputs:     settingsFiles - name of settings file
+                    tor (optional) - True/False for whether to use tor
+        """
         self.settings = json.load(open(settingsFile, 'r'))
         self.settings['file'] = settingsFile
         self.tor = tor
@@ -177,17 +198,12 @@ class TwitterBot(object):
         self.db = Database(self.settings['twittername'])
         self.logger.debug('Initialized')
 
-    def screenshot(self, filename=None):
-        """ Saves a screenshot png """
-        self.logger.info("Taking a screenshot")
-        if not filename:
-            filename = str(time.time())
-        if '.png' not in filename:
-            filename += '.png'
-        savefile = os.path.join('screenshots', filename)
-        self.driver.save_screenshot(savefile)
-
     def signin(self):
+        """Signs in user
+
+        Loads the driver and signs in.
+        After signing in it gets new data
+        """
         self.profile = webdriver.FirefoxProfile()
         self.driver = webdriver.Firefox(self.profile)
         self.driver.maximize_window()
@@ -244,7 +260,22 @@ class TwitterBot(object):
         self.signedIn = loginSuccess
         self._getStats()
 
+    def screenshot(self, filename=None):
+        """Takes a screenshot."""
+        self.logger.info("Taking a screenshot")
+        if not filename:
+            filename = str(time.time())
+        if '.png' not in filename:
+            filename += '.png'
+        savefile = os.path.join('screenshots', filename)
+        self.driver.save_screenshot(savefile)
+        
     def unfollow(self):
+        """Unfollow in bulk
+
+        Goes to following page and unfollows 60% of followers,
+        skipping the first 600.
+        """
         if not self.signedIn:
             self.signin()
 
@@ -274,6 +305,11 @@ class TwitterBot(object):
         self._getStats()
 
     def makefriends(self):
+        """Follow/Favorite/Retweet/Reply in bulk
+        
+        Searches for specified search terms (in configuration)
+        Goes through tweets and follows/favorites/retweets/replies based on probabilities
+        """
         if not self.signedIn:
             self.signin()
 
@@ -294,27 +330,44 @@ class TwitterBot(object):
             self.logger.info(
                 'Seeking out [' + search_term + '] for ' + self.settings['twittername'])
             self.liveSearch(search_term)
-            self.tweetboxes = self._loadAllTweets()
+            self.tweetboxes = self._loadAllTweets(numTimes=1)
             self.processFeed()
 
     def _loadAllTweets(self, numTimes=1000):
+        """Loads all the available tweets
+        
+        When searching or loading feed, you can use this function load 
+        tweets by continuing scrolling to the bottom until no more tweets load
+        (or numTimes reached)
+        """
         lastNum = 0
         newNum = 1
         num = 0
         while lastNum != newNum and num < numTimes:
             self.driver.execute_script(
                 "window.scrollTo(0, document.body.scrollHeight);")
+            sleep(.2)
+            self.driver.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight);")
+            sleep(.2)
+            self.driver.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight);")
+            sleep(.2)
             lastNum = newNum
             tweetboxes = self.driver.find_elements(By.CSS_SELECTOR,
                                                    ".js-stream-item.stream-item.stream-item.expanding-stream-item")
-
             num += 1
-            sleep(.75)
             newNum = len(tweetboxes)
-            print(lastNum, newNum)
+
         return tweetboxes
 
     def collectTweets(self, twitterhandle):
+        """Collects all/latest tweets
+        
+        Input:  twitterhandle - Twitter handle of the user to grab tweets from
+        
+        Saves tweets to the database.
+        """
         if not self.signedIn:
             self.signin()
 
@@ -347,6 +400,11 @@ class TwitterBot(object):
             'Inserted ' + str(boxInd - 1) + ' tweets for ' + twitterhandle)
 
     def _getTweetStats(self, tweetbox):
+        """Gets Tweet information
+        
+        Input:      tweetbox - from a feed
+        Returns:    dictionary containing tweet text, time, type, itemid, favorites, retweets
+        """
         tweet = {}
         tweet['text'] = self._getTweetText(tweetbox)
         tweet['time'] = self._getTweetTime(tweetbox)
@@ -366,6 +424,11 @@ class TwitterBot(object):
         return tweet
 
     def liveSearch(self, search_term):
+        """Gets Tweet information
+        
+        Input:      tweetbox - from a feed
+        Returns:    dictionary containing tweet text, time, type, itemid, favorites, retweets
+        """
         if not self.signedIn:
             self.signin()
 
@@ -436,8 +499,7 @@ class TwitterBot(object):
         tweet = tweet.find_element(By.CSS_SELECTOR, "div.content")
         tweet_text = tweet.find_element(
             By.CSS_SELECTOR, "p.tweet-text").text#.decode("utf-8") #.encode('utf-8')
-        #tweet_text = unidecode(tweet_text)
-        print(tweet_text)
+        tweet_text = str(tweet_text)
         tweet_text = tweet_text.replace('\n', '')
         return tweet_text
 
@@ -569,6 +631,12 @@ class TwitterBot(object):
         self._clickTweetBox(tweetbox)
 
     def _clickFollow(self, tweetbox):
+        """Click the follow button
+        
+        First hover over user name
+        Then float cursor over to the follow button
+        Then press it
+        """
         # First get into view
         self.driver.execute_script(
             "window.scrollTo(0, %s);" % str(tweetbox.location['y'] - 100))
@@ -617,10 +685,10 @@ class TwitterBot(object):
             pass
 
     def followback(self):
+        """Follow anyone that is following you"""
+        
         if not self.signedIn:
             self.signin()
-
-        unfollowProbability = self.settings['unfollowProbability']
 
         self.driver.get(
             "http://www.twitter.com/" + self.settings['twittername'] + '/following')
@@ -644,6 +712,7 @@ class TwitterBot(object):
                     sleep(.5)
 
     def _typeLikeHuman(self, element, text, enter=False):
+        """Types slowly like a human would"""
         for letter in text:
             element.send_keys(letter)
             sleep(float(random.randint(1, 100)) / 200.0)
@@ -668,20 +737,28 @@ class TwitterBot(object):
         tweetbtn = self.driver.find_elements(By.CSS_SELECTOR, css)
         tweetbtn[0].click()
 
-    def generateTweet(self):
+    def generateTweet(self,subreddit=None):
+        """Generates tweet based on something in a Reddit subreddit
+        
+        Input:  subreddit (optional) - if not used, the config settings will be used
+        """
         if not self.signedIn:
             self.signin()
         expressions = ['cool', 'Awesome!', 'Check it out!',
                        'My favorite!', 'The BEST', 'So awesome', 'I love this']
         r = praw.Reddit(user_agent='twitter-' + self.settings['twittername'])
+        if subreddit is None:
+            subreddit = self.settings['subreddit']
         submissions = r.get_subreddit(
-            self.settings['subreddit']).get_hot(limit=50)
+            subreddit).get_hot(limit=50)
         for submission in submissions:
             if submission.media is not None and submission.ups > 0:
                 self.tweet(random.choice(expressions) + ' ' + submission.url)
                 break
 
     def logout(self):
+        """Logs out and closes driver"""
+        
         self.driver.get("http://www.twitter.com/")
         css = 'btn js-tooltip settings dropdown-toggle js-dropdown-toggle'
         logout_button = self.driver.find_elements(
@@ -707,6 +784,8 @@ class TwitterBot(object):
         self.signedIn = False
 
     def _getStats(self):
+        """Gets stats from main page"""
+        
         self.driver.get("http://www.twitter.com/")
         css = 'ProfileCardStats-statValue'
         following = self.driver.find_elements(
@@ -741,3 +820,10 @@ for f in getConfigFiles():
     bots.append(TwitterBot(f))
 bots[0].collectTweets('lessig')
 '''
+
+
+'''
+bot = TwitterBot('default2.json')
+bot.makefriends()
+'''
+
