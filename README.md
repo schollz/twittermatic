@@ -40,6 +40,23 @@ bot.tweetboxes = self._loadAllTweets()
 bot.processFeed()
 ```
 
+## Features
+
+Here is a list of the current public functions accessible from the ```TwitterBot``` class:
+
+```python
+    signin()              -   Signs in the user
+    screenshot()          -   Takes screen shot
+    unfollow()            -   Unfollows in bulk
+    followback()          -   Follow back in bulk
+    collectTweets(handle) -   Collects tweets for the given handle
+    liveSearch(term)      -   Loads all the tweets that match search term
+    processFeed()         -   After using liveSearch(term) you can use this to process the tweets in feed
+    makefriends()         -   Follow/Favorite/Reply/Retweet in bulk using search terms (does liveSearch + processFeed)
+    tweet(text)           -   Tweets the given text
+    generateTweet(subreddt) - Generates a tweet from something "hot" in that subreddit
+    logout()              -   Signs out and closes down driver
+```
 
 ## Known Issues
 
