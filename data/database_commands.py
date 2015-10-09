@@ -99,7 +99,7 @@ def insertTweet(details, skipDuplicates=True):
 
 
 def addTweetToHandler(tweet,twitterhandler):
-    handles = getHandler(twitterhandle)
+    handles = getHandler(twitterhandler)
     if len(handles) < 1:
         user = {}
         user['handle'] = twitterhandler
@@ -109,7 +109,7 @@ def addTweetToHandler(tweet,twitterhandler):
         user['website'] = None
         user['bio'] = None
         insertTwitterHandler(user)
-        handler = getHandler(twitterhandle)[0]
+        handler = getHandler(twitterhandler)[0]
     else:
         handler = handles[0]
     try:
