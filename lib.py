@@ -821,7 +821,7 @@ class TwitterBot(object):
             self.settings['tweets'] = float(
                 following[0].text.replace('K', '')) * 1000
         else:
-            self.settings['tweets'] = int(following[0].text)
+            self.settings['tweets'] = int(following[0].text.replace(',', ''))
         self.settings['following'] = int(following[1].text.replace(',', ''))
         self.settings['followers'] = int(following[2].text.replace(',', ''))
         self.logger.debug('Tweets: %s, Following: %s, Followers %s' % (
@@ -861,13 +861,13 @@ from lib import *
 bot = TwitterBot('stefans.json')
 bot.collectTweets('scotus')
 
+'''
 
-
-bot = TwitterBot('default2.json')
+bot = TwitterBot('test.json')
 bot.makefriends()
 
 
-
+'''
 
 python
 from lib import *

@@ -84,8 +84,8 @@ def insertTweet(details, skipDuplicates=True):
         )
         session.add(tweet)
         session.commit()
-        handler = getHandler(details['handle'])[0]
-        handler.tweets.append(tweet)
+        #handler = getHandler(details['handle'])[0]
+        #handler.tweets.append(tweet)
         session.commit()
         return True
     except Exception as e:
