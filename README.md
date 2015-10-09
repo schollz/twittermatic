@@ -2,6 +2,7 @@
 
 This bot seeks to help users automate Twitter activities (friending, searching, unfollowing) *without the use of API keys!* Instead, this bot is completely based of [Selenium for Python](https://github.com/SeleniumHQ/selenium).
 
+This program keeps track of tweets, retweets and interactions using a database managed by SQLAlchemy.
 
 # Installation
 
@@ -40,6 +41,15 @@ bot.tweetboxes = self._loadAllTweets()
 bot.processFeed()
 ```
 
+### Tweet something from /r/funny
+
+```python
+from lib import *
+
+bot = TwitterBot('default.json') # Load bot
+bot.generateTweet('funny')
+```
+
 ## Features
 
 Here is a list of the current public functions accessible from the ```TwitterBot``` class:
@@ -63,6 +73,14 @@ Here is a list of the current public functions accessible from the ```TwitterBot
 - If you retweet, but you are blocked by that user, the program will stop (it will not be able to exit the message that you are blocked). 
 
 	Unfortunately, this happens too infrequently to be able to precisely evaluate and generate a work-around.
+
+- Firefox will tend to cache a lot.
+
+    To get around this, I suggest setting Firefox to "private" mode only. That way your passwords will also not be saved so you won't run into issues with automatic password filling in (which will throw the bot off).
+
+- Elements dissapear before I can profile them!
+
+    Use [Firefox Firebug](http://getfirebug.com/) for profiling things.
 
 ## To-do
 
