@@ -317,6 +317,9 @@ class TwitterBot(object):
                 tweet = self._getTweetStats(tweetbox)
                 tweet['handle'] = twitterhandle
                 inserted = database_commands.insertTweet(tweet)
+                #database_commands.addTweetToHandler(inserted, twitterhandle)
+                #handler = getHandler(details['handle'])[0]
+                #handler.tweets.append(tweet)
                 boxInd += 1
             if inserted:
                 self.tweetboxes = self._loadAllTweets(numTimes=5)
@@ -860,14 +863,11 @@ python
 from lib import *
 bot = TwitterBot('stefans.json')
 
-'''
 
 bot = TwitterBot('test.json')
 bot.collectTweets('scotus')
 bot.makefriends()
 
-
-'''
 
 python
 from lib import *
