@@ -1,7 +1,34 @@
 import datetime
 from data.database import Base
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, Integer, String, DateTime
+
+
+class Handler(Base):
+    __tablename__ = 'handlers'
+    id = Column(Integer, primary_key=True)
+    handle = Column(String(50), unique=True)
+    firstname = Column(String(150), unique=False)
+    lastname = Column(String(150), unique=False)
+    location = Column(String(150), unique=False)
+    website = Column(String(150), unique=False)
+    bio = Column(String(300), unique=False)
+    tweets = relationship("Tweet", backref="tweets")
+    #tweets = Column(Integer, ForeignKey("tweets.id"))
+    Timestamp =Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    def __init__(self, handle, firstname, lastname, location, website, bio):
+        self.handle = handle
+        self.firstname = firstname
+        self.lastname = lastname
+        self.location = location
+        self.website = website
+        self.bio = bio
+
+    def __repr__(self):
+        return '<Handler %r>' % (self.handle)
+
 
 class Tweet(Base):
     __tablename__ = 'tweets'
@@ -14,6 +41,7 @@ class Tweet(Base):
     retweets = Column(Integer, unique=False)
     favorites = Column(Integer, unique=False)
     status = Column(Integer, unique=False)
+    handler_id = Column(Integer, ForeignKey("handlers.id"))
     Timestamp =Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     def __init__(self, twitter_handle=None, tweet_time=None, tweet_text=None, data_type=None, data_id=None, retweets=None, favorites=None, status=None):

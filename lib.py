@@ -83,10 +83,10 @@ class TwitterBot(object):
     """
 
     def __init__(self, settingsFile, tor=False):
-        """Initialize Twitter bot
+        """ Initialize Twitter bot
 
-        @param settingsFiles    {String} name of settings file
-        @param tor              {Boolean} whether to use tor
+            @param settingsFiles    {String} name of settings file
+            @param tor              {Boolean} whether to use tor
         """
         database.init_db()
         self.settings = json.load(open(settingsFile, 'r'))
@@ -98,10 +98,10 @@ class TwitterBot(object):
         self.logger.debug('Initialized')
 
     def signin(self):
-        """Signs in user
+        """ Signs in user
 
-        Loads the driver and signs in.
-        After signing in it gets new data
+            Loads the driver and signs in.
+            After signing in it gets new data
         """
         self.profile = webdriver.FirefoxProfile()
         self.driver = webdriver.Firefox(self.profile)
@@ -159,7 +159,7 @@ class TwitterBot(object):
         self._getStats()
 
     def screenshot(self, filename=None):
-        """Takes a screenshot.
+        """ Takes a screenshot.
 
             @param filename     {String} filename for screenshot
         """
@@ -172,10 +172,10 @@ class TwitterBot(object):
         self.driver.save_screenshot(savefile)
         
     def unfollow(self):
-        """Unfollow in bulk
+        """ Unfollow in bulk
 
-        Goes to following page and unfollows 60% of followers,
-        skipping the first 600.
+            Goes to following page and unfollows 60% of followers,
+            skipping the first 600.
         """
         if not self.signedIn:
             self.signin()
@@ -206,10 +206,11 @@ class TwitterBot(object):
         self._getStats()
 
     def makefriends(self):
-        """Follow/Favorite/Retweet/Reply in bulk
+        """ Follow/Favorite/Retweet/Reply in bulk
         
-        Searches for specified search terms (in configuration)
-        Goes through tweets and follows/favorites/retweets/replies based on probabilities
+            Searches for specified search terms (in configuration)
+            Goes through tweets and follows/favorites/retweets/replies 
+            based on probabilities
         """
         if not self.signedIn:
             self.signin()
@@ -235,11 +236,11 @@ class TwitterBot(object):
             self.processFeed()
 
     def _loadAllTweets(self, numTimes=1000):
-        """Loads all the available tweets
+        """ Loads all the available tweets
         
-        When searching or loading feed, you can use this function load 
-        tweets by continuing scrolling to the bottom until no more tweets load
-        (or numTimes reached)
+            When searching or loading feed, you can use this function 
+            load tweets by continuing scrolling to the bottom until no 
+            more tweets load (or numTimes reached)
 
             @param numTimes     {Integer} number of times to scroll??
         """
@@ -264,6 +265,26 @@ class TwitterBot(object):
 
         return tweetboxes
 
+
+    def saveTwitterHandle(self,twitterhandle):
+        self.driver.get("http://www.twitter.com/" + twitterhandle)
+        name = self.driver.find_element(By.CSS_SELECTOR,"a.ProfileHeaderCard-nameLink").text.split()
+        if len(name) == 1:
+            name.append(None)
+        location = self.driver.find_element(By.CSS_SELECTOR,"div.ProfileHeaderCard-location").text
+        website = self.driver.find_element(By.CSS_SELECTOR,"div.ProfileHeaderCard-url").text
+        bio = self.driver.find_element(By.CSS_SELECTOR,"p.ProfileHeaderCard-bio").text
+        user = {}
+        user['handle'] = twitterhandle
+        user['firstname'] = name[0] 
+        user['lastname'] = name[1]
+        user['location'] = location
+        user['website'] = website
+        user['bio'] = None
+        print(user)
+        database_commands.insertTwitterHandler(user)
+
+
     def collectTweets(self, twitterhandle):
         """ Collects all/latest tweets
             Saves tweets to the database.
@@ -275,6 +296,11 @@ class TwitterBot(object):
 
         if '@' in twitterhandle:
             twitterhandle = twitterhandle.split('@')[1]
+
+        # Store User Handle
+        handles = database_commands.getHandler(twitterhandle)
+        if len(handles) < 1:
+            self.saveTwitterHandle(twitterhandle)
 
         #self.driver.get("http://www.twitter.com/" + twitterhandle)
         sleep(1)
@@ -302,7 +328,7 @@ class TwitterBot(object):
             'Inserted ' + str(boxInd - 1) + ' tweets for ' + twitterhandle)
 
     def _getTweetStats(self, tweetbox):
-        """Gets Tweet information
+        """ Gets Tweet information
 
             @param tweetbox     {WebElement} Selenium element of tweet
             @returns tweet      {Dict} contains tweet text, time, type, itemid, favorites, retweets
@@ -326,7 +352,7 @@ class TwitterBot(object):
         return tweet
 
     def liveSearch(self, search_term):
-        """Search for tweets
+        """ Search for tweets
         
             @param search_term     {String} search term
         """
@@ -381,7 +407,7 @@ class TwitterBot(object):
                     self.logger.info('Already interacted with ' + self.handle)
 
     def _processTweet(self, tweetbox):
-        """Process Tweet for stuff?????
+        """ Process Tweet for stuff?????
 
             @param tweetbox     {WebElement} Selenium element of tweet
             @returns True/False {Boolean} 
@@ -413,7 +439,7 @@ class TwitterBot(object):
         return False
 
     def _getTweetText(self, tweetbox):
-        """Gets tweet text
+        """ Gets tweet text
 
             @param tweetbox     {WebElement} Selenium element of tweet
             @returns tweet_text {String} tweet text
@@ -427,7 +453,7 @@ class TwitterBot(object):
         return tweet_text
 
     def _getTweetTime(self, tweetbox):
-        """Gets tweet timestamp
+        """ Gets tweet timestamp
 
             @param tweetbox     {WebElement} Selenium element of tweet
             @returns tweet_time {Integer} unix timestamp for tweet creation
@@ -445,7 +471,7 @@ class TwitterBot(object):
         return tweet_time
 
     def _getTweetHandle(self, tweetbox):
-        """Gets tweets user handle
+        """ Gets tweets user handle
 
             @param tweetbox     {WebElement} Selenium element of tweet
             @returns text       {String} users handler
@@ -457,7 +483,7 @@ class TwitterBot(object):
         return None
 
     def _clickTweetBox(self, tweetbox):
-        """Clicks on tweet element
+        """ Clicks on tweet element
 
             @param tweetbox     {WebElement} Selenium element of tweet
         """
@@ -498,7 +524,7 @@ class TwitterBot(object):
                 pass
 
     def _clickFavorite(self, tweetbox):
-        """Favorites a tweet
+        """ Favorites a tweet
 
             @param tweetbox     {WebElement} Selenium element of tweet
         """
@@ -514,7 +540,7 @@ class TwitterBot(object):
                 self.logger.debug('Favorited ' + self.handle)
 
     def _clickRetweet(self, tweetbox):
-        """Retweets a tweet
+        """ Retweets a tweet
 
             @param tweetbox     {WebElement} Selenium element of tweet
         """
@@ -547,7 +573,7 @@ class TwitterBot(object):
                     return True
 
     def _clickReply(self, tweetbox):
-        """Replies to a tweet
+        """ Replies to a tweet
 
             @param tweetbox     {WebElement} Selenium element of tweet
         """
@@ -576,11 +602,11 @@ class TwitterBot(object):
         sleep(0.3)
 
     def _clickFollow(self, tweetbox):
-        """Click the follow button
+        """ Click the follow button
         
-        First hover over user name
-        Then float cursor over to the follow button
-        Then press it
+            First hover over user name
+            Then float cursor over to the follow button
+            Then press it
 
             @param tweetbox     {WebElement} Selenium element of tweet
         """
@@ -659,7 +685,7 @@ class TwitterBot(object):
                     sleep(.5)
 
     def _typeLikeHuman(self, element, text, enter=False):
-        """Types slowly like a human would
+        """ Types slowly like a human would
 
             @param element      {WebElement} element to 'type' charaters
             @param enter        {Boolean} send characters
@@ -693,7 +719,7 @@ class TwitterBot(object):
         tweetbtn[0].click()
 
     def generateTweet(self,subreddit=None):
-        """Generates tweet based on something in a Reddit subreddit
+        """ Generates tweet based on something in a Reddit subreddit
         
             @param subreddit    {???} if not used, the config settings will be used
         """
@@ -758,6 +784,14 @@ class TwitterBot(object):
             f.write(json.dumps(self.settings, indent=4))
 
 
+
+
+
+
+
+
+
+
 def getConfigFiles():
     f = []
     for (dirpath, dirnames, filenames) in walk('./data'):
@@ -786,6 +820,39 @@ bot.collectTweets('scotus')
 
 bot = TwitterBot('default2.json')
 bot.makefriends()
+
+
+
+python
+from lib import *
+bot = TwitterBot('stefans.json')
+handlers = [
+    "HillaryClinton",
+    "BernieSanders",
+    "MartinOMalley",
+    "lessig",
+    "JimWebbUSA",
+    "LincolnChafee",
+    "realDonaldTrump",
+    "JebBush",
+    "RealBenCarson",
+    "ChrisChristie",
+    "tedcruz",
+    "CarlyFiorina",
+    "gov_gilmore",
+    "LindseyGrahamSC",
+    "GovMikeHuckabee",
+    "BobbyJindal",
+    "JohnKasich",
+    "GovernorPataki",
+    "RandPaul",
+    "GovernorPerry",
+    "marcorubio",
+    "RickSantorum",
+    "ScottWalker"
+]
+for handler in handlers:
+    bot.collectTweets(handler)
 
 
 

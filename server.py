@@ -13,7 +13,7 @@ Triangle(app)
 
 @app.route("/")
 def index():
-    handles = json.load(open('config.json','r'))['handles']
+    handles = json.load(open('server.json','r'))['handles']
     results = ''
     for handle in handles:
         results += handle

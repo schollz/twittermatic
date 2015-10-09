@@ -34,6 +34,12 @@ def get_tweet_by_handle(handle):
 
 
 
+
+def getHandler(handle):
+    query = session.query(Handler).filter(Handler.handle == handle)
+    results = query.all()
+    return results
+
 def hasHandle(repliedhandle, twittername):
     query = session.query(Cache).filter(Cache.repliedhandle == repliedhandle).filter(Cache.twittername == twittername)
     results = query.all()
@@ -59,21 +65,24 @@ def addRetweet(repliedhandle, tweet, twittername):
         session.rollback()
 
 
-def insertTweet(tweet, skipDuplicates=True):
+def insertTweet(details, skipDuplicates=True):
     try:
         #for item in tweet:
         #    print(item,type(tweet[item]),tweet[item])
         tweet = Tweet(
-            twitter_handle=tweet['handle'], 
-            tweet_time=datetime.datetime.utcfromtimestamp(tweet['time']), 
-            tweet_text=tweet['text'], 
-            data_type=tweet['type'], 
-            data_id=tweet['itemid'], 
-            retweets=tweet['retweets'], 
-            favorites=tweet['favorites'], 
+            twitter_handle=details['handle'], 
+            tweet_time=datetime.datetime.utcfromtimestamp(details['time']), 
+            tweet_text=details['text'], 
+            data_type=details['type'], 
+            data_id=details['itemid'], 
+            retweets=details['retweets'], 
+            favorites=details['favorites'], 
             status=1
         )
         session.add(tweet)
+        session.commit()
+        handler = getHandler(details['handle'])[0]
+        handler.tweets.append(tweet)
         session.commit()
         return True
     except Exception as e:
@@ -83,6 +92,34 @@ def insertTweet(tweet, skipDuplicates=True):
         print(e)
         session.rollback()
         return False
+
+
+def insertTwitterHandler(user):
+    try:
+        handle = Handler(
+            handle = user['handle'],
+            firstname = user['firstname'],
+            lastname = user['lastname'],
+            location = user['location'],
+            website = user['website'],
+            bio = user['bio']
+        )
+        session.add(handle)
+        session.commit()
+        return True
+    except Exception as e:
+        traceback.print_exc()
+        traceback.print_stack()
+        print("ERROR OCCURED WHEN INSERTING USER")
+        print(e)
+        session.rollback()
+        return False
+
+
+
+
+
+
 
 
 '''
