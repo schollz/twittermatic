@@ -312,6 +312,7 @@ class TwitterBot(object):
             @returns tweet      {Dict} contains tweet text, time, type, itemid, favorites, retweets
         """
         tweet = {}
+        tweet['handle'] = self._getTweetHandle(tweetbox)
         tweet['text'] = self._getTweetText(tweetbox)
         tweet['time'] = self._getTweetTime(tweetbox)
         tweet['type'] = tweetbox.get_attribute("data-item-type")
@@ -375,14 +376,14 @@ class TwitterBot(object):
             self.logger.info('Checked avoid words in  ' + str(time()-tstart))
 
             tstart = time()
-            self.handle = self._getTweetHandle(tweetbox)
-            if self.handle is not None:
-                if database_commands.hasHandle(self.handle, self.twittername): 
+            self.tweetinfo = self._getTweetStats(tweetbox)
+            if self.tweetinfo['handle'] is not None:
+                if database_commands.hasHandle(self.tweetinfo['handle'], self.twittername): 
                     dontEngage = True
                 if not dontEngage:
                     problem = self._processTweet(tweetbox)
                 else:
-                    self.logger.info('Already interacted with ' + self.handle + ' in ' + str(time()-tstart))
+                    self.logger.info('Already interacted with ' + self.tweetinfo['handle'] + ' in ' + str(time()-tstart))
 
     def _processTweet(self, tweetbox):
         """Process Tweet for stuff?????
@@ -393,7 +394,7 @@ class TwitterBot(object):
         self.driver.execute_script(
                 "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
 
-        database_commands.add(self.handle, self.twittername)
+        database_commands.add(self.tweetinfo['handle'], self.twittername)
         if random.randint(1, 100) <= self.settings['followingProbability']:
             try:
                 self.logger.info('Following')
@@ -519,7 +520,7 @@ class TwitterBot(object):
             if ("Favorite" == button.text.split('\n')[0]):
                 button.click()
                 sleep(0.1)
-                self.logger.debug('Favorited ' + self.handle)
+                self.logger.debug('Favorited ' + self.tweetinfo['handle'])
 
     def _clickRetweet(self, tweetbox):
         """Retweets a tweet
@@ -541,8 +542,8 @@ class TwitterBot(object):
                 css = '.btn.primary-btn.retweet-action'
                 sleep(0.5)
                 retweet_box.find_element(By.CSS_SELECTOR, css).click()
-                self.logger.debug('Retweeted ' + self.handle)
-                database_commands.addRetweet(self.handle, self._getTweetText(tweetbox), self.twittername)
+                self.logger.debug('Retweeted ' + self.tweetinfo['handle'])
+                database_commands.addRetweet(self.tweetinfo['handle'], self.tweetinfo['text'], self.twittername)
                 sleep(0.5)
                 try:
                     css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
@@ -577,7 +578,7 @@ class TwitterBot(object):
         responses = self.driver.find_elements(By.CSS_SELECTOR, ".message-text")
         for response in responses:
             self.logger.debug('Response to reply: ' + response.text)
-        self.logger.info('Replied to ' + self.handle)
+        self.logger.info('Replied to ' + self.tweetinfo['handle'])
         sleep(0.3)
 
     def _clickFollow(self, tweetbox):
@@ -632,7 +633,7 @@ class TwitterBot(object):
             Hover = ActionChains(self.driver).move_to_element_with_offset(
                 profile_text, 10, 10)
             Hover.perform()
-            self.logger.debug('Followed ' + self.handle)
+            self.logger.debug('Followed ' + self.tweetinfo['handle'])
         except:
             pass
 
