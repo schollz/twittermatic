@@ -381,7 +381,6 @@ class TwitterBot(object):
                     dontEngage = True
                     self.logger.info("need to avoid " + word)
                     break
-            self.logger.info('Checked avoid words in  ' + str(time()-tstart))
 
             tstart = time()
             self.tweetinfo = self._getTweetStats(tweetbox)
