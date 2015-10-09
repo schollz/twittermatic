@@ -265,13 +265,10 @@ class TwitterBot(object):
         return tweetboxes
 
     def collectTweets(self, twitterhandle):
-        """Collects all/latest tweets
-        
-        Input:  twitterhandle - Twitter handle of the user to grab tweets from
-        
-        Saves tweets to the database.
+        """ Collects all/latest tweets
+            Saves tweets to the database.
 
-            @param twitterhandle     {String}  name of users twitter handle
+            @param twitterhandle     {String} name of users twitter handle
         """
         if not self.signedIn:
             self.signin()
