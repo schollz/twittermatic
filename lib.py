@@ -694,9 +694,19 @@ class TwitterBot(object):
         self.driver.get("http://www.twitter.com/")
         """
         self.driver.get("http://www.twitter.com/")
-        twitterbox_inside = self.driver.find_element_by_css_selector('.photo-tagging-container.user-select-container.hidden')
-        twitterbox = self.driver.find_element_by_css_selector('.' + 'tweet-box rich-editor notie'.replace(' ', '.'))
-        twitterbox.click()
+        try:
+            twitterbox_inside = self.driver.find_element_by_css_selector('.photo-tagging-container.user-select-container.hidden')
+            twitterbox = self.driver.find_element_by_css_selector('.' + 'tweet-box rich-editor notie'.replace(' ', '.'))
+            twitterbox.click()
+        except:
+            pass
+        try:
+            twitterbox_inside = self.driver.find_element_by_css_selector('.photo-tagging-container.user-select-container.hidden')
+            twitterbox = self.driver.find_element_by_css_selector('.' + 'tweet-box rich-editor notie is-showPlaceholder'.replace(' ', '.'))
+            twitterbox.click()
+        except:
+            pass
+        sleep(1)
         self._typeLikeHuman(twitterbox, text)
         self.driver.find_element_by_css_selector('.' + 'btn primary-btn tweet-action tweet-btn js-tweet-btn'.replace(' ', '.')).click()
 
