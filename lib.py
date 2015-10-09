@@ -317,7 +317,7 @@ class TwitterBot(object):
                 tweet = self._getTweetStats(tweetbox)
                 tweet['handle'] = twitterhandle
                 inserted = database_commands.insertTweet(tweet)
-                database_commands.addTweetToHandler(inserted, twitterhandle)
+                #database_commands.addTweetToHandler(inserted, twitterhandle)
                 #handler = getHandler(details['handle'])[0]
                 #handler.tweets.append(tweet)
                 boxInd += 1

@@ -84,10 +84,11 @@ def insertTweet(details, skipDuplicates=True):
         )
         session.add(tweet)
         session.commit()
+        addTweetToHandler(tweet,details['handle'])
         #handler = getHandler(details['handle'])[0]
         #handler.tweets.append(tweet)
         #session.commit()
-        return tweet
+        return True
     except Exception as e:
         traceback.print_exc()
         traceback.print_stack()
@@ -98,9 +99,12 @@ def insertTweet(details, skipDuplicates=True):
 
 
 def addTweetToHandler(tweet,twitterhandler):
-    handler = getHandler(twitterhandler])[0]
-    handler.tweets.append(tweet)
-    session.commit()
+    try:
+        handler = getHandler(twitterhandler])[0]
+        handler.tweets.append(tweet)
+        session.commit()
+    except:
+        session.rollback()
 
 
 def insertTwitterHandler(user):
