@@ -29,7 +29,6 @@ import re
 import logging
 from os import walk
 from time import sleep, time
-import multiprocessing
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
