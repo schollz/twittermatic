@@ -60,7 +60,7 @@ logging.getLogger('').addHandler(console)
 selenium_logger = logging.getLogger(
     'selenium.webdriver.remote.remote_connection')
 # Only display possible problems
-selenium_logger.setLevel(logging.WARNING)
+selenium_logger.setLevel(logging.DEBUG)
 
 
 
@@ -103,6 +103,7 @@ class TwitterBot(object):
         Loads the driver and signs in.
         After signing in it gets new data
         """
+        self.logger.debug('Signing in...')
         self.profile = webdriver.FirefoxProfile()
         self.driver = webdriver.Firefox(self.profile)
 
@@ -365,13 +366,15 @@ class TwitterBot(object):
             dontEngage = False
 
             # check if you need to avoid this person
-            if not dontEngage:
-                for word in self.settings['avoid_words']:
-                    if word in tweetbox.text.lower():
-                        dontEngage = True
-                        self.logger.info("need to avoid " + word)
-                        break
+            tstart = time()
+            for word in self.settings['avoid_words']:
+                if word in tweetbox_text:
+                    dontEngage = True
+                    self.logger.info("need to avoid " + word)
+                    break
+            self.logger.info('Checked avoid words in  ' + str(time()-tstart))
 
+            tstart = time()
             self.handle = self._getTweetHandle(tweetbox)
             if self.handle is not None:
                 if database_commands.hasHandle(self.handle, self.twittername): 
@@ -379,7 +382,7 @@ class TwitterBot(object):
                 if not dontEngage:
                     problem = self._processTweet(tweetbox)
                 else:
-                    self.logger.info('Already interacted with ' + self.handle)
+                    self.logger.info('Already interacted with ' + self.handle + ' in ' + str(time()-tstart))
 
     def _processTweet(self, tweetbox):
         """Process Tweet for stuff?????
@@ -791,5 +794,3 @@ bot.makefriends()
 
 
 '''
-bot = TwitterBot('default2.json')
-bot.makefriends()
