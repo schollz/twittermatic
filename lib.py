@@ -312,12 +312,27 @@ class TwitterBot(object):
             @returns tweet      {Dict} contains tweet text, time, type, itemid, favorites, retweets
         """
         tweet = {}
-        tweet['handle'] = self._getTweetHandle(tweetbox)
+        fulltext = tweetbox.text
+        tstart = time()
+        for text in fulltext.split():
+            if '@' in text and len(text) > 4:
+                tweet['handle'] = text
+                break
+        print(time()-tstart)
+        tstart = time()
         tweet['text'] = self._getTweetText(tweetbox)
+        print(time()-tstart)
+        tstart = time()
         tweet['time'] = self._getTweetTime(tweetbox)
+        print(time()-tstart)
+        tstart = time()
         tweet['type'] = tweetbox.get_attribute("data-item-type")
+        print(time()-tstart)
+        tstart = time()
         tweet['itemid'] = tweetbox.get_attribute("data-item-id")
-        words = tweetbox.text.split('\n')
+        print(time()-tstart)
+        tstart = time()
+        words = fulltext.split('\n')
         try:
             tweet['favorites'] = utils.convertCondensedNum(
                 words[words.index('Retweet') + 1])
@@ -328,6 +343,8 @@ class TwitterBot(object):
                 words[words.index('Favorite') + 1])
         except:
             tweet['retweets'] = -1
+        print(time()-tstart)
+        tstart = time()
         return tweet
 
     def liveSearch(self, search_term):
@@ -376,17 +393,17 @@ class TwitterBot(object):
 
             # check if you need to avoid this person
             tstart = time()
-            for word in self.settings['avoid_words']:
-                if word in tweetbox_text:
-                    dontEngage = True
-                    self.logger.info("need to avoid " + word)
-                    break
-
-            tstart = time()
             self.tweetinfo = self._getTweetStats(tweetbox)
-            if self.tweetinfo['handle'] is not None:
-                if database_commands.hasHandle(self.tweetinfo['handle'], self.twittername): 
-                    dontEngage = True
+            self.logger.info('Got tweet into in ' + str(time()-tstart))
+            tstart = time()
+            if self.tweetinfo['handle'] is not None and not database_commands.hasHandle(self.tweetinfo['handle'], self.twittername):
+            
+                for word in self.settings['avoid_words']:
+                    if word in tweetbox_text:
+                        dontEngage = True
+                        self.logger.info("need to avoid " + word)
+                        break
+
                 if not dontEngage:
                     problem = self._processTweet(tweetbox)
                 else:
@@ -460,17 +477,6 @@ class TwitterBot(object):
         tweet_time = int(tweet_time)
         return tweet_time
 
-    def _getTweetHandle(self, tweetbox):
-        """Gets tweets user handle
-
-            @param tweetbox     {WebElement} Selenium element of tweet
-            @returns text       {String} users handler
-        """
-        #for text in unidecode(tweetbox.text).split():
-        for text in tweetbox.text.split():
-            if '@' in text and len(text) > 4:
-                return text
-        return None
 
     def _clickTweetBox(self, tweetbox):
         """Clicks on tweet element
@@ -736,28 +742,30 @@ class TwitterBot(object):
 
     def logout(self):
         """Logs out and closes driver"""
-        
-        self.driver.get("http://www.twitter.com/")
-        css = 'btn js-tooltip settings dropdown-toggle js-dropdown-toggle'
-        logout_button = self.driver.find_elements(
-            By.CSS_SELECTOR, '.' + css.replace(' ', '.'))
-        logout_button[0].click()
-        sleep(0.1)
-        css = 'dropdown-link'
-        dropdown_menu = self.driver.find_elements(
-            By.CSS_SELECTOR, '.' + css.replace(' ', '.'))
+        try:
+            self.driver.get("http://www.twitter.com/")
+            css = 'btn js-tooltip settings dropdown-toggle js-dropdown-toggle'
+            logout_button = self.driver.find_elements(
+                By.CSS_SELECTOR, '.' + css.replace(' ', '.'))
+            logout_button[0].click()
+            sleep(0.1)
+            css = 'dropdown-link'
+            dropdown_menu = self.driver.find_elements(
+                By.CSS_SELECTOR, '.' + css.replace(' ', '.'))
 
-        for menu in dropdown_menu:
-            if 'Log out' in menu.text:
-                menu.click()
-                break
+            for menu in dropdown_menu:
+                if 'Log out' in menu.text:
+                    menu.click()
+                    break
 
-        if 'logged_out' in self.driver.current_url:
-            self.logger.debug(
-                'Logged out from ' + self.settings['twittername'])
-        else:
+            if 'logged_out' in self.driver.current_url:
+                self.logger.debug(
+                    'Logged out from ' + self.settings['twittername'])
+            else:
+                self.logger.error('Something went wrong with logging out')
+        except:
             self.logger.error('Something went wrong with logging out')
-
+            
         self.driver.close()
         self.signedIn = False
 
