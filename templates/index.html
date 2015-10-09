@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" data-ng-app>
+    <head>
+        <title>Political Tweets</title>
+        <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">   -->
+        <script src="{{ url_for('static', filename='jquery-1.11.0.js') }}"></script>
+        <script src="{{ url_for('static', filename='angular-1.4.5.min.js') }}"></script>
+        
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='jquery-1.10.9.dataTables.min.css') }}">
+        <script src="{{ url_for('static', filename='jquery-1.10.9.dataTables.min.js') }}"></script>
+
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='DataTables-1.10.9/media/css/jquery.dataTables.css') }}">
+        <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='DataTables-1.10.9/media/js/jquery.dataTables.js') }}"></script>
+        <script type="text/javascript" language="javascript" src="{{ url_for('static', filename='angular-datatables/src/angular-datatables.js') }}"></script>
+
+        <style>
+            tfoot input {
+                    width: 100%;
+                    padding: 3px;
+                    box-sizing: border-box;
+                }
+        </style>
+
+    </head>
+    <body>
+<!--
+        <label>Name:</label>
+        <input type="text" data-ng-model="yourName" placeholder="Enter a name here">
+        <h3>Hello {{yourName|angular}}!</h3>
+        <hr>
+-->
+        <h3>{{title}}</h3>
+        
+        <div ng-init="tweets = {{tweets}}"></div>
+
+        <table id="tweet_table" datatable class="display row-border hover" cellspacing="0" width="100%">
+
+            <thead>
+                <tr>
+                    <th>handle</th>
+                    <th>timestamp</th>
+                    <th>id</th>
+                <!--    <th>status</th>     -->
+                    <th>text</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>handle</th>
+                    <th>timestamp</th>
+                    <th>id</th>
+                <!--    <th>status</th>     -->
+                    <th>text</th>
+                </tr>
+            </tfoot>
+
+            <tbody>
+                <tr ng-repeat="tweet in tweets | filter:search:strict">
+                    <td>{{tweet.twitter_handle | angular }}</td>
+                    <td>{{tweet.tweet_time | angular }}</td>
+                    <td>{{tweet.data_id | angular }}</td>
+                <!--    <td>{{tweet.status | angular }}</td>    -->
+                    <td>{{tweet.tweet_text | angular }}</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+
+
+        <script>
+
+            $(document).ready(function(){
+            /*
+             *  Document Title
+             */
+                document.title = "{{title}}";
+
+            /*
+             *  Column Filters
+             */
+                // Setup - add a text input to each footer cell
+                $('#tweet_table tfoot th').each( function () {
+                    var title = $('#tweet_table thead th').eq( $(this).index() ).text();
+                    $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+                } );
+ 
+                // DataTable
+                var table = $('#tweet_table').DataTable();
+
+                // Apply the search
+                table.columns().every( function () {
+                    var that = this;
+                    $( 'input', this.footer() ).on( 'keyup change', function () {
+                        if ( that.search() !== this.value ) {
+                            that
+                                .search( this.value )
+                                .draw();
+                        }
+                    });
+                });
+
+            });
+
+
+
+
+
+
+        </script>
+
+
+
+    </body>
+</html>
