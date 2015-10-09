@@ -109,6 +109,7 @@ def addTweetToHandler(tweet,twitterhandler):
         user['website'] = None
         user['bio'] = None
         insertTwitterHandler(user)
+        handles = getHandler(twitterhandle)
     try:
         handler = handles[0]
         handler.tweets.append(tweet)
