@@ -354,9 +354,7 @@ class TwitterBot(object):
         self.logger.debug(self.driver.current_url)
         if 'search' not in self.driver.current_url and search_term.split()[0] not in self.driver.current_url:
             self.logger.error('Problem with searching')
-            
-        self.driver.find_element_by_css_selector(
-                '.AdaptiveSearchTitle-title').click()
+
 
     def processFeed(self):
         for tweetbox in self.tweetboxes:
@@ -395,21 +393,25 @@ class TwitterBot(object):
         database_commands.add(self.handle, self.twittername)
         if random.randint(1, 100) <= self.settings['followingProbability']:
             try:
+                self.logger.info('Following')
                 self._clickFollow(tweetbox)
             except:
                 self.logger.error('Error following!')
         if random.randint(1, 100) <= self.settings['favoritingProbability']:
             try:
+                self.logger.info('favoriting')
                 self._clickFavorite(tweetbox)
             except:
                 self.logger.error('Error favoriting!')
         if random.randint(1, 100) <= self.settings['retweetingProbability']:
             try:
+                self.logger.info('retweeting')
                 self._clickRetweet(tweetbox)
             except:
                 self.logger.error('Error retweeting!')
         if random.randint(1, 100) <= self.settings['replyProbability']:
             try:
+                self.logger.info('replying')
                 self._clickReply(tweetbox)
             except:
                 self.logger.error('Error replying!')
@@ -511,7 +513,7 @@ class TwitterBot(object):
         buttons = tweetbox.find_elements(By.CSS_SELECTOR, css)
         button_num = 0
         for button in buttons:
-            if ("Favorite" in button.text):
+            if ("Favorite" == button.text.split('\n')[0]):
                 button.click()
                 sleep(0.1)
                 self.logger.debug('Favorited ' + self.handle)
@@ -527,7 +529,7 @@ class TwitterBot(object):
         buttons = tweetbox.find_elements(By.CSS_SELECTOR, css)
         button_num = 0
         for button in buttons:
-            if ("Retweet" in button.text):
+            if ("Retweet" == button.text.split('\n')[0]):
                 button.click()
                 sleep(0.5)
                 css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
@@ -554,22 +556,19 @@ class TwitterBot(object):
 
             @param tweetbox     {WebElement} Selenium element of tweet
         """
-        css = '.' + \
-            'ProfileTweet-actionButton ProfileTweet-follow-button js-tooltip'.replace(
-                ' ', ',')
-        buttons = tweetbox.find_elements(By.CSS_SELECTOR, css)
-        button_num = 0
-        for button in buttons:
-            if ("Reply" in button.text):
-                button.click()
-
+        reply_button = tweetbox.find_element_by_css_selector('.' +'ProfileTweet-actionButton u-textUserColorHover js-actionButton js-actionReply'.replace(' ', ','))
+        self.logger.info('Clicking reply')
+        reply_button.click()
+        
         sleep(0.5)
         textbox = tweetbox.find_element(
             By.CSS_SELECTOR, ".tweet-box.rich-editor.notie")
         thereply = random.choice(self.settings['replies'])
+        self.logger.info('sending keys to ' + textbox.text)
         textbox.send_keys(thereply)
         twitter_button = tweetbox.find_element(
             By.CSS_SELECTOR, ".btn.primary-btn.tweet-action.tweet-btn.js-tweet-btn")
+        self.logger.info('clicking twitter_button ' + twitter_button.text)
         twitter_button.click()
         sleep(0.5)
         responses = self.driver.find_elements(By.CSS_SELECTOR, ".message-text")
@@ -786,12 +785,11 @@ bot.collectTweets('scotus')
 
 
 
-
 bot = TwitterBot('default2.json')
 bot.makefriends()
 
 
 
-
 '''
-
+bot = TwitterBot('default2.json')
+bot.makefriends()
