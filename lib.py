@@ -691,23 +691,15 @@ class TwitterBot(object):
         """Sends a tweet
 
             @param text         {String} tweet text
+        self.driver.get("http://www.twitter.com/")
         """
         self.driver.get("http://www.twitter.com/")
-        css = '.' + 'tweet-box rich-editor notie'.replace(' ', '.')
-        twitterbox = self.driver.find_elements(By.CSS_SELECTOR, css)
-        if len(twitterbox) == 0:
-            css = '.' + \
-                'tweet-box rich-editor notie is-showPlaceholder'.replace(
-                    ' ', '.')
-            twitterbox = self.driver.find_elements(By.CSS_SELECTOR, css)
+        twitterbox_inside = self.driver.find_element_by_css_selector('.photo-tagging-container.user-select-container.hidden')
+        twitterbox = self.driver.find_element_by_css_selector('.' + 'tweet-box rich-editor notie'.replace(' ', '.'))
+        twitterbox.click()
+        self._typeLikeHuman(twitterbox, text)
+        self.driver.find_element_by_css_selector('.' + 'btn primary-btn tweet-action tweet-btn js-tweet-btn'.replace(' ', '.')).click()
 
-        self._typeLikeHuman(twitterbox[0], text)
-
-        css = '.' + \
-            'btn primary-btn tweet-action tweet-btn js-tweet-btn'.replace(
-                ' ', '.')
-        tweetbtn = self.driver.find_elements(By.CSS_SELECTOR, css)
-        tweetbtn[0].click()
 
     def generateTweet(self,subreddit=None,title=True):
         """Generates tweet based on something in a Reddit subreddit
@@ -724,7 +716,8 @@ class TwitterBot(object):
         submissions = r.get_subreddit(
             subreddit).get_hot(limit=50)
         for submission in submissions:
-            if title and len(submission.title)>10 and len(submission.title) < 60:
+            print(submission.title)
+            if title and len(submission.title)>10 and len(submission.title) < 100:
                 self.tweet(submission.title)
                 break
             if not title and submission.media is not None and submission.ups > 0:
