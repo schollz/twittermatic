@@ -74,8 +74,6 @@ class Cache(Base):
         return '<Cache %r>' % (self.repliedhandle)
 
 
-
-
 class Retweet(Base):
     __tablename__ = 'retweets'
     id = Column(Integer, primary_key=True)
