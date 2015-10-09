@@ -99,8 +99,18 @@ def insertTweet(details, skipDuplicates=True):
 
 
 def addTweetToHandler(tweet,twitterhandler):
+    handles = getHandler(twitterhandle)
+    if len(handles) < 1:
+        user = {}
+        user['handle'] = twitterhandler
+        user['firstname'] = None
+        user['lastname'] = None
+        user['location'] = None
+        user['website'] = None
+        user['bio'] = None
+        insertTwitterHandler(user)
     try:
-        handler = getHandler(twitterhandler])[0]
+        handler = handles[0]
         handler.tweets.append(tweet)
         session.commit()
     except:
