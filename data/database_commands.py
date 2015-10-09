@@ -63,7 +63,7 @@ def insertTweet(tweet, skipDuplicates=True):
     try:
         #for item in tweet:
         #    print(item,type(tweet[item]),tweet[item])
-        retweet = Tweet(
+        tweet = Tweet(
             twitter_handle=tweet['handle'], 
             tweet_time=datetime.datetime.utcfromtimestamp(tweet['time']), 
             tweet_text=tweet['text'], 
@@ -73,7 +73,7 @@ def insertTweet(tweet, skipDuplicates=True):
             favorites=tweet['favorites'], 
             status=1
         )
-        session.add(retweet)
+        session.add(tweet)
         session.commit()
         return True
     except Exception as e:

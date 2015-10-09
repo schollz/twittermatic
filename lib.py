@@ -31,7 +31,6 @@ from os import walk
 from time import sleep, time
 import multiprocessing
 
-#import sqlite3
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -63,99 +62,6 @@ selenium_logger = logging.getLogger(
 # Only display possible problems
 selenium_logger.setLevel(logging.WARNING)
 
-# Generic functions
-
-'''
-class Database(object):
-
-    def __init__(self, twittername):
-        self.logger = logging.getLogger(twittername)
-        self.twittername = twittername
-        self.conn = sqlite3.connect("./data/data.db")
-        self.c = self.conn.cursor()
-        try:
-            self.c.execute("""CREATE TABLE cache(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                twittername TEXT, 
-                repliedhandle TEXT, 
-                Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)""")
-        except:
-            print("Table already exists")
-        try:
-            self.c.execute("""CREATE TABLE retweets(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                twittername TEXT, 
-                repliedhandle TEXT, 
-                tweet TEXT, 
-                Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)""")
-        except:
-            print("Table already exists")
-        try:
-            self.c.execute("""CREATE TABLE tweets(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                handle TEXT, 
-                text TEXT, 
-                tweet_time INTEGER, 
-                retweets INTEGER, 
-                favorites INTEGER, 
-                type TEXT, 
-                itemid INTEGER, 
-                Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)""")
-        except:
-            print("Table already exists")
-
-    def add(self, handle):
-        if not self.hasHandle(handle):
-            cmd = """INSERT INTO cache (twittername,repliedhandle) VALUES ('%s','%s')""" % (
-                self.twittername, handle)
-            self.c.execute(cmd)
-            self.conn.commit()
-
-    def addRetweet(self, handle, tweet):
-        try:
-            cmd = """INSERT INTO retweets (twittername,repliedhandle,tweet) VALUES ('%s','%s','%s')""" % (
-                self.twittername, handle, tweet.replace("'", "''"))
-            self.c.execute(cmd)
-            self.conn.commit()
-        except:
-            print("ERROR OCCURED WHEN INSERTING TWEET")
-
-    def hasHandle(self, handle):
-        cmd = """SELECT repliedhandle FROM cache WHERE repliedhandle LIKE '%s' and twittername like '%s' LIMIT 1""" % (
-            handle, self.twittername)
-        self.c.execute(cmd)
-        foundOne = False
-        for row in self.c.fetchall():
-            foundOne = True
-            break
-        return foundOne
-
-    def hasTweet(self, tweet):
-        cmd = """SELECT * FROM tweets WHERE handle LIKE '%s' and text like '%s' and tweet_time = %s LIMIT 1""" % (
-            tweet['handle'], tweet['text'], str(tweet['time']))
-        self.c.execute(cmd)
-        foundOne = False
-        for row in self.c.fetchall():
-            foundOne = True
-            break
-        return foundOne
-
-    def insertTweet(self, tweet, skipDuplicates=True):
-        tweet['text'] = tweet['text'].replace("'", "''")
-        if (self.hasTweet(tweet) and skipDuplicates):
-            self.logger.info('Have rest of tweets for ' + tweet['handle'])
-            return False
-        else:
-            cmd = """INSERT INTO tweets (handle,text,tweet_time,retweets,favorites,type,itemid) VALUES ('%s','%s',%s,%s,%s,'%s',%s)""" % (
-                tweet['handle'], tweet['text'], str(tweet['time']), str(tweet['retweets']), str(tweet['favorites']), str(tweet['type']), str(tweet['itemid']))
-            self.logger.info(cmd)
-            self.c.execute(cmd)
-            self.conn.commit()
-            return True
-'''
-
-
-
 
 
 class TwitterBot(object):
@@ -179,15 +85,9 @@ class TwitterBot(object):
     def __init__(self, settingsFile, tor=False):
         """Initialize Twitter bot
 
-        Inputs:     settingsFiles - name of settings file
-                    tor (optional) - True/False for whether to use tor
+        @param settingsFiles    {String} name of settings file
+        @param tor              {Boolean} whether to use tor
         """
-
-        database.init_db()
-
-class TwitterBot(object):
-
-    def __init__(self, settingsFile, tor=False):
         database.init_db()
         self.settings = json.load(open(settingsFile, 'r'))
         self.settings['file'] = settingsFile
@@ -259,7 +159,10 @@ class TwitterBot(object):
         self._getStats()
 
     def screenshot(self, filename=None):
-        """Takes a screenshot."""
+        """Takes a screenshot.
+
+            @param filename     {String} filename for screenshot
+        """
         self.logger.info("Taking a screenshot")
         if not filename:
             filename = str(time.time())
@@ -337,6 +240,8 @@ class TwitterBot(object):
         When searching or loading feed, you can use this function load 
         tweets by continuing scrolling to the bottom until no more tweets load
         (or numTimes reached)
+
+            @param numTimes     {Integer} number of times to scroll??
         """
         lastNum = 0
         newNum = 1
@@ -365,6 +270,8 @@ class TwitterBot(object):
         Input:  twitterhandle - Twitter handle of the user to grab tweets from
         
         Saves tweets to the database.
+
+            @param twitterhandle     {String}  name of users twitter handle
         """
         if not self.signedIn:
             self.signin()
@@ -399,9 +306,9 @@ class TwitterBot(object):
 
     def _getTweetStats(self, tweetbox):
         """Gets Tweet information
-        
-        Input:      tweetbox - from a feed
-        Returns:    dictionary containing tweet text, time, type, itemid, favorites, retweets
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+            @returns tweet      {Dict} contains tweet text, time, type, itemid, favorites, retweets
         """
         tweet = {}
         tweet['text'] = self._getTweetText(tweetbox)
@@ -422,10 +329,9 @@ class TwitterBot(object):
         return tweet
 
     def liveSearch(self, search_term):
-        """Gets Tweet information
+        """Search for tweets
         
-        Input:      tweetbox - from a feed
-        Returns:    dictionary containing tweet text, time, type, itemid, favorites, retweets
+            @param search_term     {String} search term
         """
         if not self.signedIn:
             self.signin()
@@ -478,6 +384,11 @@ class TwitterBot(object):
                     self.logger.info('Already interacted with ' + self.handle)
 
     def _processTweet(self, tweetbox):
+        """Process Tweet for stuff?????
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+            @returns True/False {Boolean} 
+        """
         self.driver.execute_script(
                 "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
 
@@ -505,6 +416,11 @@ class TwitterBot(object):
         return False
 
     def _getTweetText(self, tweetbox):
+        """Gets tweet text
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+            @returns tweet_text {String} tweet text
+        """
         tweet = tweetbox.find_element(By.TAG_NAME, "div")
         tweet = tweet.find_element(By.CSS_SELECTOR, "div.content")
         tweet_text = tweet.find_element(
@@ -514,6 +430,11 @@ class TwitterBot(object):
         return tweet_text
 
     def _getTweetTime(self, tweetbox):
+        """Gets tweet timestamp
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+            @returns tweet_time {Integer} unix timestamp for tweet creation
+        """
         tweet = tweetbox.find_element(By.TAG_NAME, "div")
         tweet = tweet.find_element(By.CSS_SELECTOR, "div.content")
         tweet_time = tweet.find_element(
@@ -527,6 +448,11 @@ class TwitterBot(object):
         return tweet_time
 
     def _getTweetHandle(self, tweetbox):
+        """Gets tweets user handle
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+            @returns text       {String} users handler
+        """
         #for text in unidecode(tweetbox.text).split():
         for text in tweetbox.text.split():
             if '@' in text and len(text) > 4:
@@ -534,6 +460,10 @@ class TwitterBot(object):
         return None
 
     def _clickTweetBox(self, tweetbox):
+        """Clicks on tweet element
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+        """
         self.logger.info('Clicking ' + tweetbox.text.split('\n')[0])
         clickSuccess = False
         try:
@@ -571,6 +501,10 @@ class TwitterBot(object):
                 pass
 
     def _clickFavorite(self, tweetbox):
+        """Favorites a tweet
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+        """
         css = '.' + \
             'ProfileTweet-actionButton ProfileTweet-follow-button js-tooltip'.replace(
                 ' ', ',')
@@ -583,6 +517,10 @@ class TwitterBot(object):
                 self.logger.debug('Favorited ' + self.handle)
 
     def _clickRetweet(self, tweetbox):
+        """Retweets a tweet
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+        """
         css = '.' + \
             'ProfileTweet-actionButton ProfileTweet-follow-button js-tooltip'.replace(
                 ' ', ',')
@@ -612,6 +550,10 @@ class TwitterBot(object):
                     return True
 
     def _clickReply(self, tweetbox):
+        """Replies to a tweet
+
+            @param tweetbox     {WebElement} Selenium element of tweet
+        """
         css = '.' + \
             'ProfileTweet-actionButton ProfileTweet-follow-button js-tooltip'.replace(
                 ' ', ',')
@@ -642,6 +584,8 @@ class TwitterBot(object):
         First hover over user name
         Then float cursor over to the follow button
         Then press it
+
+            @param tweetbox     {WebElement} Selenium element of tweet
         """
         # First get into view
         self.driver.execute_script(
@@ -718,7 +662,11 @@ class TwitterBot(object):
                     sleep(.5)
 
     def _typeLikeHuman(self, element, text, enter=False):
-        """Types slowly like a human would"""
+        """Types slowly like a human would
+
+            @param element      {WebElement} element to 'type' charaters
+            @param enter        {Boolean} send characters
+        """
         for letter in text:
             element.send_keys(letter)
             sleep(float(random.randint(1, 100)) / 200.0)
@@ -726,6 +674,10 @@ class TwitterBot(object):
             element.send_keys(Keys.RETURN)
 
     def tweet(self, text):
+        """Sends a tweet
+
+            @param text         {String} tweet text
+        """
         self.driver.get("http://www.twitter.com/")
         css = '.' + 'tweet-box rich-editor notie'.replace(' ', '.')
         twitterbox = self.driver.find_elements(By.CSS_SELECTOR, css)
@@ -746,7 +698,7 @@ class TwitterBot(object):
     def generateTweet(self,subreddit=None):
         """Generates tweet based on something in a Reddit subreddit
         
-        Input:  subreddit (optional) - if not used, the config settings will be used
+            @param subreddit    {???} if not used, the config settings will be used
         """
         if not self.signedIn:
             self.signin()
@@ -833,11 +785,13 @@ bot = TwitterBot('stefans.json')
 bot.collectTweets('scotus')
 
 
-'''
-
 
 
 bot = TwitterBot('default2.json')
 bot.makefriends()
 
+
+
+
+'''
 
