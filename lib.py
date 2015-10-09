@@ -1,25 +1,25 @@
 """YATA
 
-This is a true twitter bot that makes it easy to 
+This is a true twitter bot that makes it easy to
 make friends, and bulk follow-back or unfollow people.
 
 WITH GREAT POWER COMES GREAT RESPONSIBILITY.
 
-Try not to abuse this script. Check the config.json file for 
-parameters that change how aggressive this bot will try to 
-make friends. 
+Try not to abuse this script. Check the config.json file for
+parameters that change how aggressive this bot will try to
+make friends.
 
 Notes:
 
-- When you reach 2,000 followers, you will not be able to add any more. 
+- When you reach 2,000 followers, you will not be able to add any more.
   Currently this script doesn't ever check how many followers you have,
   so it will just keep trucking even though it won't be following people
-  after 2,000. When you reach 2,000 just run twitterbot.py unfollow to 
+  after 2,000. When you reach 2,000 just run twitterbot.py unfollow to
   get rid of folks.
 
-- There are random sleeps throughout the script to make it "look" 
+- There are random sleeps throughout the script to make it "look"
   more like a real person is interacting with the site.
-  
+
 """
 
 import random
@@ -29,7 +29,6 @@ import re
 import logging
 from os import walk
 from time import sleep, time
-import multiprocessing
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -60,15 +59,15 @@ logging.getLogger('').addHandler(console)
 selenium_logger = logging.getLogger(
     'selenium.webdriver.remote.remote_connection')
 # Only display possible problems
-selenium_logger.setLevel(logging.WARNING)
-
+selenium_logger.setLevel(logging.WARN)
 
 
 class TwitterBot(object):
+
     """TwitterBot object
-    
+
     Public Methods:
-    
+
     signin()              -   Signs in the user
     screenshot()          -   Takes screen shot
     unfollow()            -   Unfollows in bulk
@@ -103,6 +102,7 @@ class TwitterBot(object):
             Loads the driver and signs in.
             After signing in it gets new data
         """
+        self.logger.debug('Signing in...')
         self.profile = webdriver.FirefoxProfile()
         self.driver = webdriver.Firefox(self.profile)
 
@@ -170,7 +170,7 @@ class TwitterBot(object):
             filename += '.png'
         savefile = os.path.join('screenshots', filename)
         self.driver.save_screenshot(savefile)
-        
+
     def unfollow(self):
         """ Unfollow in bulk
 
@@ -302,7 +302,6 @@ class TwitterBot(object):
         if len(handles) < 1:
             self.saveTwitterHandle(twitterhandle)
 
-        #self.driver.get("http://www.twitter.com/" + twitterhandle)
         sleep(1)
 
         self.liveSearch('from:' + twitterhandle)
@@ -317,7 +316,7 @@ class TwitterBot(object):
                 tweetbox = self.tweetboxes[boxInd]
                 tweet = self._getTweetStats(tweetbox)
                 tweet['handle'] = twitterhandle
-                inserted = database_commands.insertTweet(tweet) 
+                inserted = database_commands.insertTweet(tweet)
                 boxInd += 1
             if inserted:
                 self.tweetboxes = self._loadAllTweets(numTimes=5)
@@ -334,11 +333,27 @@ class TwitterBot(object):
             @returns tweet      {Dict} contains tweet text, time, type, itemid, favorites, retweets
         """
         tweet = {}
+        fulltext = tweetbox.text
+        tstart = time()
+        for text in fulltext.split():
+            if '@' in text and len(text) > 4:
+                tweet['handle'] = text
+                break
+        print(time() - tstart)
+        tstart = time()
         tweet['text'] = self._getTweetText(tweetbox)
+        print(time() - tstart)
+        tstart = time()
         tweet['time'] = self._getTweetTime(tweetbox)
+        print(time() - tstart)
+        tstart = time()
         tweet['type'] = tweetbox.get_attribute("data-item-type")
+        print(time() - tstart)
+        tstart = time()
         tweet['itemid'] = tweetbox.get_attribute("data-item-id")
-        words = tweetbox.text.split('\n')
+        print(time() - tstart)
+        tstart = time()
+        words = fulltext.split('\n')
         try:
             tweet['favorites'] = utils.convertCondensedNum(
                 words[words.index('Retweet') + 1])
@@ -349,11 +364,13 @@ class TwitterBot(object):
                 words[words.index('Favorite') + 1])
         except:
             tweet['retweets'] = -1
+        print(time() - tstart)
+        tstart = time()
         return tweet
 
     def liveSearch(self, search_term):
         """ Search for tweets
-        
+
             @param search_term     {String} search term
         """
         if not self.signedIn:
@@ -362,9 +379,17 @@ class TwitterBot(object):
         self.driver.get(
             "http://www.twitter.com/" + self.settings['twittername'])
         sleep(1)
-        elem = self.driver.find_element_by_name("q")
-        elem.clear()
-        elem.send_keys(search_term + Keys.RETURN)
+        try:
+            elem = self.driver.find_element_by_name("q")
+            elem.clear()
+            elem.send_keys(search_term + Keys.RETURN)
+        except:
+            try:
+                elem = self.driver.find_element_by_name("q")
+                elem.clear()
+                elem.send_keys(search_term + Keys.RETURN)
+            except:
+                pass
         sleep(1)
         if not self.settings['topResults']:
             self.driver.find_element_by_css_selector(
@@ -377,9 +402,6 @@ class TwitterBot(object):
         self.logger.debug(self.driver.current_url)
         if 'search' not in self.driver.current_url and search_term.split()[0] not in self.driver.current_url:
             self.logger.error('Problem with searching')
-            
-        self.driver.find_element_by_css_selector(
-                '.AdaptiveSearchTitle-title').click()
 
     def processFeed(self):
         for tweetbox in self.tweetboxes:
@@ -390,49 +412,55 @@ class TwitterBot(object):
             dontEngage = False
 
             # check if you need to avoid this person
-            if not dontEngage:
+            tstart = time()
+            self.tweetinfo = self._getTweetStats(tweetbox)
+            self.logger.info('Got tweet into in ' + str(time() - tstart))
+            tstart = time()
+            if self.tweetinfo['handle'] is not None and not database_commands.hasHandle(self.tweetinfo['handle'], self.twittername):
+
                 for word in self.settings['avoid_words']:
-                    if word in tweetbox.text.lower():
+                    if word in tweetbox_text:
                         dontEngage = True
                         self.logger.info("need to avoid " + word)
                         break
 
-            self.handle = self._getTweetHandle(tweetbox)
-            if self.handle is not None:
-                if database_commands.hasHandle(self.handle, self.twittername): 
-                    dontEngage = True
                 if not dontEngage:
                     problem = self._processTweet(tweetbox)
                 else:
-                    self.logger.info('Already interacted with ' + self.handle)
+                    self.logger.info('Already interacted with ' + self.tweetinfo[
+                                     'handle'] + ' in ' + str(time() - tstart))
 
     def _processTweet(self, tweetbox):
         """ Process Tweet for stuff?????
 
             @param tweetbox     {WebElement} Selenium element of tweet
-            @returns True/False {Boolean} 
+            @returns True/False {Boolean}
         """
         self.driver.execute_script(
-                "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
+            "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
 
-        database_commands.add(self.handle, self.twittername)
+        database_commands.add(self.tweetinfo['handle'], self.twittername)
         if random.randint(1, 100) <= self.settings['followingProbability']:
             try:
+                self.logger.info('Following')
                 self._clickFollow(tweetbox)
             except:
                 self.logger.error('Error following!')
         if random.randint(1, 100) <= self.settings['favoritingProbability']:
             try:
+                self.logger.info('favoriting')
                 self._clickFavorite(tweetbox)
             except:
                 self.logger.error('Error favoriting!')
         if random.randint(1, 100) <= self.settings['retweetingProbability']:
             try:
+                self.logger.info('retweeting')
                 self._clickRetweet(tweetbox)
             except:
                 self.logger.error('Error retweeting!')
         if random.randint(1, 100) <= self.settings['replyProbability']:
             try:
+                self.logger.info('replying')
                 self._clickReply(tweetbox)
             except:
                 self.logger.error('Error replying!')
@@ -447,7 +475,7 @@ class TwitterBot(object):
         tweet = tweetbox.find_element(By.TAG_NAME, "div")
         tweet = tweet.find_element(By.CSS_SELECTOR, "div.content")
         tweet_text = tweet.find_element(
-            By.CSS_SELECTOR, "p.tweet-text").text#.decode("utf-8") #.encode('utf-8')
+            By.CSS_SELECTOR, "p.tweet-text").text  # .decode("utf-8") #.encode('utf-8')
         tweet_text = str(tweet_text)
         tweet_text = tweet_text.replace('\n', '')
         return tweet_text
@@ -469,6 +497,7 @@ class TwitterBot(object):
         tweet_time = tweet_time.get_attribute("data-time")
         tweet_time = int(tweet_time)
         return tweet_time
+
 
     def _getTweetHandle(self, tweetbox):
         """ Gets tweets user handle
@@ -534,10 +563,10 @@ class TwitterBot(object):
         buttons = tweetbox.find_elements(By.CSS_SELECTOR, css)
         button_num = 0
         for button in buttons:
-            if ("Favorite" in button.text):
+            if ("Favorite" == button.text.split('\n')[0]):
                 button.click()
                 sleep(0.1)
-                self.logger.debug('Favorited ' + self.handle)
+                self.logger.debug('Favorited ' + self.tweetinfo['handle'])
 
     def _clickRetweet(self, tweetbox):
         """ Retweets a tweet
@@ -550,7 +579,7 @@ class TwitterBot(object):
         buttons = tweetbox.find_elements(By.CSS_SELECTOR, css)
         button_num = 0
         for button in buttons:
-            if ("Retweet" in button.text):
+            if ("Retweet" == button.text.split('\n')[0]):
                 button.click()
                 sleep(0.5)
                 css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
@@ -559,16 +588,21 @@ class TwitterBot(object):
                 css = '.btn.primary-btn.retweet-action'
                 sleep(0.5)
                 retweet_box.find_element(By.CSS_SELECTOR, css).click()
-                self.logger.debug('Retweeted ' + self.handle)
-                database_commands.addRetweet(self.handle, self._getTweetText(tweetbox), self.twittername)
-                sleep(0.1)
+                self.logger.debug('Retweeted ' + self.tweetinfo['handle'])
+                self.tweetinfo['type'] = 'rt'
+                database_commands.insertTweet(self.tweetinfo)
+                sleep(0.5)
                 try:
                     css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
                     css = 'Icon Icon--close Icon--medium dismissIcon Icon--close Icon--medium dismiss'
+                    css = 'modal-btn modal-close js-close'
                     css = '.' + css.replace(' ', '.')
                     exit = self.driver.find_element(By.CSS_SELECTOR, css)
                     exit.click()
                     return True
+                    self.logger.debug('*' * 30)
+                    self.logger.debug('Exited the Retweet')
+                    self.logger.debug('*' * 30)
                 except:
                     return True
 
@@ -577,28 +611,26 @@ class TwitterBot(object):
 
             @param tweetbox     {WebElement} Selenium element of tweet
         """
-        css = '.' + \
-            'ProfileTweet-actionButton ProfileTweet-follow-button js-tooltip'.replace(
-                ' ', ',')
-        buttons = tweetbox.find_elements(By.CSS_SELECTOR, css)
-        button_num = 0
-        for button in buttons:
-            if ("Reply" in button.text):
-                button.click()
+        reply_button = tweetbox.find_element_by_css_selector(
+            '.' + 'ProfileTweet-actionButton u-textUserColorHover js-actionButton js-actionReply'.replace(' ', ','))
+        self.logger.info('Clicking reply')
+        reply_button.click()
 
+        sleep(0.5)
         textbox = tweetbox.find_element(
             By.CSS_SELECTOR, ".tweet-box.rich-editor.notie")
         thereply = random.choice(self.settings['replies'])
+        self.logger.info('sending keys to ' + textbox.text)
         textbox.send_keys(thereply)
-        sleep(0.3)
         twitter_button = tweetbox.find_element(
             By.CSS_SELECTOR, ".btn.primary-btn.tweet-action.tweet-btn.js-tweet-btn")
+        self.logger.info('clicking twitter_button ' + twitter_button.text)
         twitter_button.click()
         sleep(0.5)
         responses = self.driver.find_elements(By.CSS_SELECTOR, ".message-text")
         for response in responses:
             self.logger.debug('Response to reply: ' + response.text)
-        self.logger.info('Replied to ' + self.handle)
+        self.logger.info('Replied to ' + self.tweetinfo['handle'])
         sleep(0.3)
 
     def _clickFollow(self, tweetbox):
@@ -639,7 +671,8 @@ class TwitterBot(object):
 
         try:
             sleep(0.5)
-            #if (' not-following' in unidecode(container.get_attribute("innerHTML"))):
+            # if (' not-following' in
+            # unidecode(container.get_attribute("innerHTML"))):
             if (' not-following' in container.get_attribute("innerHTML")):
                 sleep(0.5)
                 css = '.' + \
@@ -653,13 +686,13 @@ class TwitterBot(object):
             Hover = ActionChains(self.driver).move_to_element_with_offset(
                 profile_text, 10, 10)
             Hover.perform()
-            self.logger.debug('Followed ' + self.handle)
+            self.logger.debug('Followed ' + self.tweetinfo['handle'])
         except:
             pass
 
     def followback(self):
         """Follow anyone that is following you"""
-        
+
         if not self.signedIn:
             self.signin()
 
@@ -700,27 +733,34 @@ class TwitterBot(object):
         """Sends a tweet
 
             @param text         {String} tweet text
+        self.driver.get("http://www.twitter.com/")
         """
         self.driver.get("http://www.twitter.com/")
-        css = '.' + 'tweet-box rich-editor notie'.replace(' ', '.')
-        twitterbox = self.driver.find_elements(By.CSS_SELECTOR, css)
-        if len(twitterbox) == 0:
-            css = '.' + \
-                'tweet-box rich-editor notie is-showPlaceholder'.replace(
-                    ' ', '.')
-            twitterbox = self.driver.find_elements(By.CSS_SELECTOR, css)
+        try:
+            twitterbox_inside = self.driver.find_element_by_css_selector(
+                '.photo-tagging-container.user-select-container.hidden')
+            twitterbox = self.driver.find_element_by_css_selector(
+                '.' + 'tweet-box rich-editor notie'.replace(' ', '.'))
+            twitterbox.click()
+        except:
+            pass
+        try:
+            twitterbox_inside = self.driver.find_element_by_css_selector(
+                '.photo-tagging-container.user-select-container.hidden')
+            twitterbox = self.driver.find_element_by_css_selector(
+                '.' + 'tweet-box rich-editor notie is-showPlaceholder'.replace(' ', '.'))
+            twitterbox.click()
+        except:
+            pass
+        sleep(1)
+        self._typeLikeHuman(twitterbox, text)
+        self.driver.find_element_by_css_selector(
+            '.' + 'btn primary-btn tweet-action tweet-btn js-tweet-btn'.replace(' ', '.')).click()
 
-        self._typeLikeHuman(twitterbox[0], text)
-
-        css = '.' + \
-            'btn primary-btn tweet-action tweet-btn js-tweet-btn'.replace(
-                ' ', '.')
-        tweetbtn = self.driver.find_elements(By.CSS_SELECTOR, css)
-        tweetbtn[0].click()
 
     def generateTweet(self,subreddit=None):
         """ Generates tweet based on something in a Reddit subreddit
-        
+
             @param subreddit    {???} if not used, the config settings will be used
         """
         if not self.signedIn:
@@ -733,32 +773,38 @@ class TwitterBot(object):
         submissions = r.get_subreddit(
             subreddit).get_hot(limit=50)
         for submission in submissions:
-            if submission.media is not None and submission.ups > 0:
+            print(submission.title)
+            if title and len(submission.title) > 10 and len(submission.title) < 100:
+                self.tweet(submission.title)
+                break
+            if not title and submission.media is not None and submission.ups > 0:
                 self.tweet(random.choice(expressions) + ' ' + submission.url)
                 break
 
     def logout(self):
         """Logs out and closes driver"""
-        
-        self.driver.get("http://www.twitter.com/")
-        css = 'btn js-tooltip settings dropdown-toggle js-dropdown-toggle'
-        logout_button = self.driver.find_elements(
-            By.CSS_SELECTOR, '.' + css.replace(' ', '.'))
-        logout_button[0].click()
-        sleep(0.1)
-        css = 'dropdown-link'
-        dropdown_menu = self.driver.find_elements(
-            By.CSS_SELECTOR, '.' + css.replace(' ', '.'))
+        try:
+            self.driver.get("http://www.twitter.com/")
+            css = 'btn js-tooltip settings dropdown-toggle js-dropdown-toggle'
+            logout_button = self.driver.find_elements(
+                By.CSS_SELECTOR, '.' + css.replace(' ', '.'))
+            logout_button[0].click()
+            sleep(0.1)
+            css = 'dropdown-link'
+            dropdown_menu = self.driver.find_elements(
+                By.CSS_SELECTOR, '.' + css.replace(' ', '.'))
 
-        for menu in dropdown_menu:
-            if 'Log out' in menu.text:
-                menu.click()
-                break
+            for menu in dropdown_menu:
+                if 'Log out' in menu.text:
+                    menu.click()
+                    break
 
-        if 'logged_out' in self.driver.current_url:
-            self.logger.debug(
-                'Logged out from ' + self.settings['twittername'])
-        else:
+            if 'logged_out' in self.driver.current_url:
+                self.logger.debug(
+                    'Logged out from ' + self.settings['twittername'])
+            else:
+                self.logger.error('Something went wrong with logging out')
+        except:
             self.logger.error('Something went wrong with logging out')
 
         self.driver.close()
@@ -766,7 +812,7 @@ class TwitterBot(object):
 
     def _getStats(self):
         """Gets stats from main page"""
-        
+
         self.driver.get("http://www.twitter.com/")
         css = 'ProfileCardStats-statValue'
         following = self.driver.find_elements(
@@ -817,9 +863,9 @@ bot.collectTweets('scotus')
 
 
 
-
 bot = TwitterBot('default2.json')
 bot.makefriends()
+
 
 
 
@@ -858,4 +904,3 @@ for handler in handlers:
 
 
 '''
-

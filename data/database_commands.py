@@ -56,6 +56,9 @@ def add(repliedhandle, twittername):
             session.rollback()
 
 def addRetweet(repliedhandle, tweet, twittername):
+    print ("-"*30)
+    print(tweet)
+    print ("-"*30)
     try:
         retweet = Retweet(twittername,repliedhandle,tweet)
         session.add(retweet)
