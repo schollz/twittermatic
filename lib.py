@@ -556,7 +556,8 @@ class TwitterBot(object):
                 sleep(0.5)
                 retweet_box.find_element(By.CSS_SELECTOR, css).click()
                 self.logger.debug('Retweeted ' + self.tweetinfo['handle'])
-                database_commands.addRetweet(self.tweetinfo['handle'], self.tweetinfo['text'], self.twittername)
+                self.tweetinfo['type'] = 'rt'
+                database_commands.insertTweet(self.tweetinfo)
                 sleep(0.5)
                 try:
                     css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
