@@ -555,10 +555,14 @@ class TwitterBot(object):
                 try:
                     css = 't1-form tweet-form RetweetDialog-tweetForm isWithoutComment condensed'
                     css = 'Icon Icon--close Icon--medium dismissIcon Icon--close Icon--medium dismiss'
+                    css = 'modal-btn modal-close js-close'
                     css = '.' + css.replace(' ', '.')
                     exit = self.driver.find_element(By.CSS_SELECTOR, css)
                     exit.click()
                     return True
+                    self.logger.debug('*'*30)
+                    self.logger.debug('Exited the Retweet')
+                    self.logger.debug('*'*30)
                 except:
                     return True
 
@@ -720,7 +724,7 @@ class TwitterBot(object):
         submissions = r.get_subreddit(
             subreddit).get_hot(limit=50)
         for submission in submissions:
-            if title and len(submission.title)>10:
+            if title and len(submission.title)>10 and len(submission.title) < 60:
                 self.tweet(submission.title)
                 break
             if not title and submission.media is not None and submission.ups > 0:
