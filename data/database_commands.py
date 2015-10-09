@@ -98,11 +98,11 @@ def insertTweet(details, skipDuplicates=True):
         return False
 
 
-def addTweetToHandler(tweet,twitterhandler):
+def addTweetToHandler(tweet,twitterhandle):
     handles = getHandler(twitterhandle)
     if len(handles) < 1:
         user = {}
-        user['handle'] = twitterhandler
+        user['handle'] = twitterhandle
         user['firstname'] = None
         user['lastname'] = None
         user['location'] = None

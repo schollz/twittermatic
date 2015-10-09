@@ -863,11 +863,10 @@ python
 from lib import *
 bot = TwitterBot('stefans.json')
 
-
+'''
 bot = TwitterBot('test.json')
-bot.collectTweets('scotus')
 bot.makefriends()
-
+'''
 
 python
 from lib import *
