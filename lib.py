@@ -60,7 +60,7 @@ logging.getLogger('').addHandler(console)
 selenium_logger = logging.getLogger(
     'selenium.webdriver.remote.remote_connection')
 # Only display possible problems
-selenium_logger.setLevel(logging.DEBUG)
+selenium_logger.setLevel(logging.WARN)
 
 
 
@@ -341,9 +341,17 @@ class TwitterBot(object):
         self.driver.get(
             "http://www.twitter.com/" + self.settings['twittername'])
         sleep(1)
-        elem = self.driver.find_element_by_name("q")
-        elem.clear()
-        elem.send_keys(search_term + Keys.RETURN)
+        try:
+            elem = self.driver.find_element_by_name("q")
+            elem.clear()
+            elem.send_keys(search_term + Keys.RETURN)
+        except:
+            try:
+                elem = self.driver.find_element_by_name("q")
+                elem.clear()
+                elem.send_keys(search_term + Keys.RETURN)
+            except:
+                pass
         sleep(1)
         if not self.settings['topResults']:
             self.driver.find_element_by_css_selector(
@@ -698,7 +706,7 @@ class TwitterBot(object):
         tweetbtn = self.driver.find_elements(By.CSS_SELECTOR, css)
         tweetbtn[0].click()
 
-    def generateTweet(self,subreddit=None):
+    def generateTweet(self,subreddit=None,title=True):
         """Generates tweet based on something in a Reddit subreddit
         
             @param subreddit    {???} if not used, the config settings will be used
@@ -713,7 +721,10 @@ class TwitterBot(object):
         submissions = r.get_subreddit(
             subreddit).get_hot(limit=50)
         for submission in submissions:
-            if submission.media is not None and submission.ups > 0:
+            if title and len(submission.title)>10:
+                self.tweet(submission.title)
+                break
+            if not title and submission.media is not None and submission.ups > 0:
                 self.tweet(random.choice(expressions) + ' ' + submission.url)
                 break
 
