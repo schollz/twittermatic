@@ -859,11 +859,11 @@ bots[0].collectTweets('lessig')
 python
 from lib import *
 bot = TwitterBot('stefans.json')
-bot.collectTweets('scotus')
 
 '''
 
 bot = TwitterBot('test.json')
+bot.collectTweets('scotus')
 bot.makefriends()
 
 
