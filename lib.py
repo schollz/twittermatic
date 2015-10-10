@@ -281,6 +281,9 @@ class TwitterBot(object):
         user['location'] = location
         user['website'] = website
         user['bio'] = None
+        for key in user:
+            if user[key] is not None:
+                user[key] = user[key].encode('utf-8')
         print(user)
         database_commands.insertTwitterHandler(user)
 
@@ -355,6 +358,15 @@ class TwitterBot(object):
                 words[words.index('Favorite') + 1])
         except:
             tweet['retweets'] = -1
+            
+        # Get rid of weird characters
+        for key in tweet:
+            if tweet[key] is not None:
+                try:
+                    tweet[key] = tweet[key].encode('utf-8')
+                except:
+                    pass
+            
         return tweet
 
     def liveSearch(self, search_term):
