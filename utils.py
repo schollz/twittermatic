@@ -8,3 +8,10 @@ def convertCondensedNum(strnum):
     else:
         return int(strnum)
 
+def getConfigFiles():
+    f = []
+    for (dirpath, dirnames, filenames) in walk('./data'):
+        for filename in filenames:
+            if '.json' in filename:
+                f.append('./data/' + filename)
+    return f

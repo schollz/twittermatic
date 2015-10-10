@@ -833,23 +833,6 @@ class TwitterBot(object):
             f.write(json.dumps(self.settings, indent=4))
 
 
-
-
-
-
-
-
-
-
-def getConfigFiles():
-    f = []
-    for (dirpath, dirnames, filenames) in walk('./data'):
-        for filename in filenames:
-            if '.json' in filename:
-                f.append('./data/' + filename)
-    return f
-
-
 '''
 # Load bots
 bots = []
@@ -863,10 +846,8 @@ python
 from lib import *
 bot = TwitterBot('stefans.json')
 
-'''
 bot = TwitterBot('test.json')
 bot.makefriends()
-'''
 
 python
 from lib import *
