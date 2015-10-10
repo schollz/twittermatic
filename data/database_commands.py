@@ -15,7 +15,10 @@ session = Session()
 
 
 def get_tweet_by_id(tweet_id):
-    """ Get Tweet by ID """
+    """ Get Tweet by ID 
+
+        @param tweet_id     {String} id of tweet
+    """
     query = session.query(Tweet).filter(Tweet.itemid == tweet_id)
     results = query.all()
     if len(results) > 0:
@@ -24,22 +27,39 @@ def get_tweet_by_id(tweet_id):
         return None
 
 def get_tweet_by_handle(handle):
-    """ Get Tweet by handle """
+    """ Get Tweet by handle 
+
+        @param handle     {String} handle of user
+    """
     query = session.query(Tweet).filter(Tweet.handle == handle)
     results = query.all()
     return results
 
 def getHandler(handle):
+    """ Twitter Handle 
+
+        @param handle     {String} handle of user
+    """
     query = session.query(Handler).filter(Handler.handle == handle)
     results = query.all()
     return results
 
 def hasHandle(repliedhandle, twittername):
+    """ Check if handle exists 
+
+        @param repliedhandle    {String} handle of user
+        @param twittername      {String} handle of current user
+    """
     query = session.query(Cache).filter(Cache.repliedhandle == repliedhandle).filter(Cache.twittername == twittername)
     results = query.all()
     return len(results) > 0
 
 def add(repliedhandle, twittername):
+    """ Add to cache 
+
+        @param repliedhandle    {String} handle of user
+        @param twittername      {String} handle of current user
+    """
     if not hasHandle(repliedhandle, twittername):
         try:
             cache = Cache(twittername,repliedhandle)
@@ -50,6 +70,12 @@ def add(repliedhandle, twittername):
             session.rollback()
 
 def addRetweet(repliedhandle, tweet, twittername):
+    """ Adds retweet 
+
+        @param repliedhandle    {String} handle of user
+        @param twittername      {String} handle of current user
+        @param tweet            {String} text of tweet
+    """
     print ("-"*30)
     print(tweet)
     print ("-"*30)
@@ -62,6 +88,13 @@ def addRetweet(repliedhandle, tweet, twittername):
         session.rollback()
 
 def insertTweet(details, skipDuplicates=True):
+    """ Adds tweet to database 
+
+        @param details          {Dict} contains tweet details
+        @param skipDuplicates   {Boolean} optional, if true does 
+                                    not insert if tweet already 
+                                    saved
+    """
     try:
         if not skipDuplicates:
             if get_tweet_by_id(details['itemid']) != None:
@@ -89,6 +122,12 @@ def insertTweet(details, skipDuplicates=True):
         return False
 
 def addTweetToHandler(tweet,twitterhandler):
+    """ Adds tweet to handler in database
+        if user isn't in database one will be created.
+
+        @param tweet            {Tweet} Tweet model object
+        @param twitterhandler   {String} handler of twitter user
+    """
     handles = getHandler(twitterhandler)
     if len(handles) < 1:
         user = {}
@@ -109,6 +148,10 @@ def addTweetToHandler(tweet,twitterhandler):
         session.rollback()
 
 def insertTwitterHandler(user):
+    """ Adds twitter handler to database
+
+        @param user     {Dict} Contains user details
+    """
     try:
         handle = Handler(
             handle = user['handle'],
