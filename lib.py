@@ -37,7 +37,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime, timedelta
 import praw
 
-import utils
+from utils import *
 import data.database as database
 import data.database_commands as database_commands
 
@@ -358,12 +358,12 @@ class TwitterBot(object):
         tstart = time()
         words = fulltext.split('\n')
         try:
-            tweet['favorites'] = utils.convertCondensedNum(
+            tweet['favorites'] = convertCondensedNum(
                 words[words.index('Retweet') + 1])
         except:
             tweet['favorites'] = -1
         try:
-            tweet['retweets'] = utils.convertCondensedNum(
+            tweet['retweets'] = convertCondensedNum(
                 words[words.index('Favorite') + 1])
         except:
             tweet['retweets'] = -1
