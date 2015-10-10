@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 # Create Database Driver/Engine
 engine = create_engine('sqlite:///data/tweets.db', echo=False)
-
+logger = logging.getLogger('db_cmds')
 # Create a Session
 Session = sessionmaker(bind=engine)
 session = Session()

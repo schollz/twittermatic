@@ -37,7 +37,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime, timedelta
 import praw
 
-from utils import *
+import utils
 import data.database as database
 import data.database_commands as database_commands
 
@@ -317,14 +317,12 @@ class TwitterBot(object):
                 tweet = self._getTweetStats(tweetbox)
                 tweet['handle'] = twitterhandle
                 inserted = database_commands.insertTweet(tweet)
-                #database_commands.addTweetToHandler(inserted, twitterhandle)
-                #handler = getHandler(details['handle'])[0]
-                #handler.tweets.append(tweet)
                 boxInd += 1
             if inserted:
                 self.tweetboxes = self._loadAllTweets(numTimes=5)
                 lastNumBoxes = numBoxes
                 numBoxes = len(self.tweetboxes)
+                self.logger.info('Completed ' + str(boxInd) + ' tweets, loaded ' + str(numBoxes-lastNumBoxes) + ' more tweets for ' + twitterhandle)
 
         self.logger.info(
             'Inserted ' + str(boxInd - 1) + ' tweets for ' + twitterhandle)
@@ -342,33 +340,21 @@ class TwitterBot(object):
             if '@' in text and len(text) > 4:
                 tweet['handle'] = text
                 break
-        print(time() - tstart)
-        tstart = time()
         tweet['text'] = self._getTweetText(tweetbox)
-        print(time() - tstart)
-        tstart = time()
         tweet['time'] = self._getTweetTime(tweetbox)
-        print(time() - tstart)
-        tstart = time()
         tweet['type'] = tweetbox.get_attribute("data-item-type")
-        print(time() - tstart)
-        tstart = time()
         tweet['itemid'] = tweetbox.get_attribute("data-item-id")
-        print(time() - tstart)
-        tstart = time()
         words = fulltext.split('\n')
         try:
-            tweet['favorites'] = convertCondensedNum(
+            tweet['favorites'] = utils.convertCondensedNum(
                 words[words.index('Retweet') + 1])
         except:
             tweet['favorites'] = -1
         try:
-            tweet['retweets'] = convertCondensedNum(
+            tweet['retweets'] = utils.convertCondensedNum(
                 words[words.index('Favorite') + 1])
         except:
             tweet['retweets'] = -1
-        print(time() - tstart)
-        tstart = time()
         return tweet
 
     def liveSearch(self, search_term):
@@ -833,6 +819,17 @@ class TwitterBot(object):
             f.write(json.dumps(self.settings, indent=4))
 
 
+
+
+def getConfigFiles():
+    f = []
+    for (dirpath, dirnames, filenames) in walk('./data'):
+        for filename in filenames:
+            if '.json' in filename:
+                f.append('./data/' + filename)
+    return f
+
+
 '''
 # Load bots
 bots = []
@@ -849,8 +846,8 @@ bot = TwitterBot('stefans.json')
 bot = TwitterBot('test.json')
 bot.makefriends()
 
-python
 from lib import *
+python
 bot = TwitterBot('stefans.json')
 handlers = [
     "HillaryClinton",
