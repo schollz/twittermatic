@@ -18,7 +18,7 @@ class Handler(Base):
     #tweets = Column(Integer, ForeignKey("tweets.id"))
     Timestamp =Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
-    def __init__(self, handle, firstname, lastname, location, website, bio):
+    def __init__(self, handle, firstname=None, lastname=None, location=None, website=None, bio=None):
         self.handle = handle
         self.firstname = firstname
         self.lastname = lastname

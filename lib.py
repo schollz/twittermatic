@@ -890,8 +890,10 @@ handlers = [
     "ScottWalker"
 ]
 for handler in handlers:
-    bot.collectTweets(handler)
-
+    try:
+        bot.collectTweets(handler)
+    except:
+        pass
 
 
 
