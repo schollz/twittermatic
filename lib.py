@@ -281,6 +281,9 @@ class TwitterBot(object):
         user['location'] = location
         user['website'] = website
         user['bio'] = None
+        for key in user:
+            if user[key] is not None:
+                user[key] = user[key].encode('utf-8')
         print(user)
         database_commands.insertTwitterHandler(user)
 
@@ -314,17 +317,18 @@ class TwitterBot(object):
         while lastNumBoxes != numBoxes and inserted:
             while boxInd < len(self.tweetboxes) and inserted:
                 tweetbox = self.tweetboxes[boxInd]
-                tweet = self._getTweetStats(tweetbox)
-                tweet['handle'] = twitterhandle
-                inserted = database_commands.insertTweet(tweet)
-                #database_commands.addTweetToHandler(inserted, twitterhandle)
-                #handler = getHandler(details['handle'])[0]
-                #handler.tweets.append(tweet)
+                try:
+                    tweet = self._getTweetStats(tweetbox)
+                    tweet['handle'] = twitterhandle
+                    inserted = database_commands.insertTweet(tweet)
+                except:
+                    inserted = True
                 boxInd += 1
             if inserted:
                 self.tweetboxes = self._loadAllTweets(numTimes=5)
                 lastNumBoxes = numBoxes
                 numBoxes = len(self.tweetboxes)
+                self.logger.info('Completed ' + str(boxInd) + ' tweets, loaded ' + str(numBoxes-lastNumBoxes) + ' more tweets for ' + twitterhandle)
 
         self.logger.info(
             'Inserted ' + str(boxInd - 1) + ' tweets for ' + twitterhandle)
@@ -342,20 +346,10 @@ class TwitterBot(object):
             if '@' in text and len(text) > 4:
                 tweet['handle'] = text
                 break
-        print(time() - tstart)
-        tstart = time()
         tweet['text'] = self._getTweetText(tweetbox)
-        print(time() - tstart)
-        tstart = time()
         tweet['time'] = self._getTweetTime(tweetbox)
-        print(time() - tstart)
-        tstart = time()
         tweet['type'] = tweetbox.get_attribute("data-item-type")
-        print(time() - tstart)
-        tstart = time()
         tweet['itemid'] = tweetbox.get_attribute("data-item-id")
-        print(time() - tstart)
-        tstart = time()
         words = fulltext.split('\n')
         try:
             tweet['favorites'] = utils.convertCondensedNum(
@@ -367,8 +361,15 @@ class TwitterBot(object):
                 words[words.index('Favorite') + 1])
         except:
             tweet['retweets'] = -1
-        print(time() - tstart)
-        tstart = time()
+            
+        # Get rid of weird characters
+        for key in tweet:
+            if tweet[key] is not None:
+                try:
+                    tweet[key] = tweet[key].encode('utf-8')
+                except:
+                    pass
+            
         return tweet
 
     def liveSearch(self, search_term):
@@ -806,9 +807,9 @@ class TwitterBot(object):
                 self.logger.debug(
                     'Logged out from ' + self.settings['twittername'])
             else:
-                self.logger.error('Something went wrong with logging out')
+                self.logger.warn('Something went wrong with logging out')
         except:
-            self.logger.error('Something went wrong with logging out')
+            pass
 
         self.driver.close()
         self.signedIn = False
@@ -835,12 +836,6 @@ class TwitterBot(object):
 
 
 
-
-
-
-
-
-
 def getConfigFiles():
     f = []
     for (dirpath, dirnames, filenames) in walk('./data'):
@@ -863,14 +858,11 @@ python
 from lib import *
 bot = TwitterBot('stefans.json')
 
-
 bot = TwitterBot('test.json')
-bot.collectTweets('scotus')
 bot.makefriends()
 
-
-python
 from lib import *
+python
 bot = TwitterBot('stefans.json')
 handlers = [
     "HillaryClinton",

@@ -8,3 +8,4 @@ def convertCondensedNum(strnum):
     else:
         return int(strnum)
 
+

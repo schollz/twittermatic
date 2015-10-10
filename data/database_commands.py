@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 
 # Create Database Driver/Engine
 engine = create_engine('sqlite:///data/tweets.db', echo=False)
-
+logger = logging.getLogger('db_cmds')
 # Create a Session
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -102,7 +102,7 @@ def addTweetToHandler(tweet,twitterhandler):
     handles = getHandler(twitterhandler)
     if len(handles) < 1:
         user = {}
-        user['handle'] = twitterhandler
+        user['handle'] = twitterhandle
         user['firstname'] = None
         user['lastname'] = None
         user['location'] = None
@@ -236,7 +236,6 @@ def insertTweet(tweet, skipDuplicates=True):
         print(e)
         session.rollback()
         return False
-=======
             print("ERROR OCCURED WHEN INSERTING TWEET")
 
     def hasHandle(self, handle):
