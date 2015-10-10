@@ -28,6 +28,8 @@ bot = TwitterBot('default.json') # Load bot
 bot.collectTweets('scotus') 
 ```
 
+This will save all the tweets in a database ```data/tweets.db``` in a table called ```tweets``` with all the Twitter user information in a relational table ```handlers```.
+
 ### Do a live search for #cats and retweet at those handles
 
 This will go through and search for ```#cats``` and retweet, reply, and favorite the tweets depending on your set probabilities in ```default.json```.
@@ -37,17 +39,19 @@ from lib import *
 
 bot = TwitterBot('default.json') # Load bot
 bot.liveSearch('#cats')
-bot.tweetboxes = self._loadAllTweets()
+bot.loadEntireFeed()
 bot.processFeed()
 ```
 
-### Tweet something from /r/funny
+Any person that is interacted with is saved to the database  ```data/tweets.db``` in a table called ```cache```. Any retweet is also saved in a table ```tweets``` with ```type``` ```"rt"```.
+
+### Tweet something
 
 ```python
 from lib import *
 
 bot = TwitterBot('default.json') # Load bot
-bot.generateTweet('funny')
+bot.generateTweet()
 ```
 
 ## Features
@@ -61,10 +65,12 @@ Here is a list of the current public functions accessible from the ```TwitterBot
     followback()          -   Follow back in bulk
     collectTweets(handle) -   Collects tweets for the given handle
     liveSearch(term)      -   Loads all the tweets that match search term
+    loadEntireFeed()      -   After doing a search, this can be used to load the entire feed
     processFeed()         -   After using liveSearch(term) you can use this to process the tweets in feed
-    makefriends()         -   Follow/Favorite/Reply/Retweet in bulk using search terms (does liveSearch + processFeed)
+    makefriends()         -   Follow/Favorite/Reply/Retweet in bulk using search terms 
+                                (does liveSearch + loadEntireFeed + processFeed)
     tweet(text)           -   Tweets the given text
-    generateTweet(subreddt) - Generates a tweet from something "hot" in that subreddit
+    generateTweet()       -   Generates a tweet from the corpus
     logout()              -   Signs out and closes down driver
 ```
 
