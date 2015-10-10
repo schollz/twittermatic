@@ -4,7 +4,7 @@ This bot seeks to help users automate Twitter activities (friending, searching, 
 
 This program keeps track of tweets, retweets and interactions using a database managed by SQLAlchemy.
 
-# Installation
+## Installation
 
 ```bash
 pip install -r requirements.txt
@@ -15,7 +15,59 @@ Copy the config file into the ```data``` folder and edit it with your login deta
 cp default.json ./data/default.json
 ```
 
+
+
 ## Usage
+
+## ```makefriends()```
+
+The function ```makefriends()``` is a special function that does a lot of automation based only on your configuration file. The ```default.json``` config file looks like:
+
+```javascript
+{
+    "username": "YOUR USERNAME",
+    "twittername": "YOUR TWITTER HANDLE",
+    "password": "YOUR PASSWORD",
+    "topResults": false,
+    "retweetingProbability": 50,
+    "replyProbability": 50,
+    "favoritingProbability": 50,
+    "followingProbability": 50,
+    "search_expressions": [
+        "#cats",
+    ],
+    "search_avoid_words": [
+        "dog"
+    ],
+    "avoid_words": [
+        "dog"
+    ],
+    "replies": [
+        "I love cats!",
+        "Cool!",
+        "Awesome",
+        ":)"
+    ]
+}
+```
+
+The first three parameters are most important - they are your Twitter sign-in details. The rest of the data is if you care to use the ```makefriends()```. For instance if you use:
+
+```
+from lib import *
+bot = TwitterBot('default.json') # Load bot
+bot.makefriends()
+```
+
+Then the bot will do the following:
+
+1. Search for ```search_expressions``` minus the ```search_avoid_words```,  so it will search "#cats -dogs".
+2. Load the entire feed
+3. Go through tweets, one-by-one, skipping tweets that have the ```avoid_words```.
+4. Go through each tweet and Follow/Favoite/Retweet/Reply based on the probabilities in the settings.
+5. If the bot replies, it will randomly choose one of the ```replies```.
+
+Another neat feature of ```makefriends()``` - if your bot signs in and it sees it has more than 1,800 followers, then it will automatically use ```unfollow()``` to unfollow some of them.
 
 ### Collect tweets from somebody
 
