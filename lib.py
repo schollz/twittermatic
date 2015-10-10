@@ -317,9 +317,12 @@ class TwitterBot(object):
         while lastNumBoxes != numBoxes and inserted:
             while boxInd < len(self.tweetboxes) and inserted:
                 tweetbox = self.tweetboxes[boxInd]
-                tweet = self._getTweetStats(tweetbox)
-                tweet['handle'] = twitterhandle
-                inserted = database_commands.insertTweet(tweet)
+                try:
+                    tweet = self._getTweetStats(tweetbox)
+                    tweet['handle'] = twitterhandle
+                    inserted = database_commands.insertTweet(tweet)
+                except:
+                    inserted = True
                 boxInd += 1
             if inserted:
                 self.tweetboxes = self._loadAllTweets(numTimes=5)
@@ -804,9 +807,9 @@ class TwitterBot(object):
                 self.logger.debug(
                     'Logged out from ' + self.settings['twittername'])
             else:
-                self.logger.error('Something went wrong with logging out')
+                self.logger.warn('Something went wrong with logging out')
         except:
-            self.logger.error('Something went wrong with logging out')
+            pass
 
         self.driver.close()
         self.signedIn = False
