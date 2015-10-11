@@ -16,8 +16,9 @@ def randomTweet():
     fpath = 'data/tweet_corpus.txt'
     buffer = []
 
-    f = open(fpath, 'r')
+    f = open(fpath, 'r',encoding='utf8')
     for line_num, line in enumerate(f):
+        line = line.encode('utf-8')
         n = line_num + 1.0
         r = random.random()
         if n <= C:
@@ -28,6 +29,7 @@ def randomTweet():
     
     words = []
     for word in buffer[0].split():
+        word = word.decode("utf-8")
         if '#' not in word:
             words.append(word)
             
