@@ -424,7 +424,6 @@ class TwitterBot(object):
             # check if you need to avoid this person
             tstart = time()
             self.tweetinfo = self._getTweetStats(tweetbox)
-            self.logger.info('Got tweet into in ' + str(time() - tstart))
             tstart = time()
             if self.tweetinfo['handle'] is not None and not database_commands.hasHandle(self.tweetinfo['handle'], self.twittername):
 
