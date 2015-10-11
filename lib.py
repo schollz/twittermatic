@@ -773,7 +773,7 @@ class TwitterBot(object):
         """
         if not self.signedIn:
             self.signin()
-        self.tweet(randomTweet())
+        self.tweet(utils.randomTweet())
 
     def generateTweet2(self,subreddit=None):
         """ Generates tweet based on something in a Reddit subreddit
