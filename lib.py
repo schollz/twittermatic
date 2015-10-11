@@ -735,7 +735,7 @@ class TwitterBot(object):
         """
         for letter in text:
             element.send_keys(letter)
-            sleep(float(random.randint(1, 100)) / 200.0)
+            sleep(float(random.randint(1, 100)) / 500.0)
         if enter:
             element.send_keys(Keys.RETURN)
 
