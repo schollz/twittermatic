@@ -339,6 +339,56 @@ class TwitterBot(object):
 
         self.logger.info(
             'Inserted ' + str(boxInd - 1) + ' tweets for ' + twitterhandle)
+            
+    def collectAllTweets(self, twitterhandle):
+        """ Collects all tweets
+            Saves tweets to the database.
+
+            @param twitterhandle     {String} name of users twitter handle
+        """
+        if not self.signedIn:
+            self.signin()
+
+        if '@' in twitterhandle:
+            twitterhandle = twitterhandle.split('@')[1]
+
+        # Store User Handle
+        handles = database_commands.getHandler(twitterhandle)
+        if len(handles) < 1:
+            self.saveTwitterHandle(twitterhandle)
+
+        sleep(1)
+        for i in range(len(utils.allTwitterDates)-1):
+            try:
+                cmd = 'from:' + twitterhandle + '  since:' + utils.allTwitterDates[i] + ' until:' + utils.allTwitterDates[i+1]
+                self.logger.info('searching: "' + cmd + "'")
+                self.liveSearch(cmd)
+                boxInd = 0
+                lastNumBoxes = 0
+                self.tweetboxes = self._loadAllTweets(numTimes=5)
+                numBoxes = len(self.tweetboxes)
+                inserted = True
+                while lastNumBoxes != numBoxes and inserted:
+                    while boxInd < len(self.tweetboxes) and inserted:
+                        tweetbox = self.tweetboxes[boxInd]
+                        try:
+                            tweet = self._getTweetStats(tweetbox)
+                            tweet['handle'] = twitterhandle
+                            inserted = database_commands.insertTweet(tweet)
+                        except:
+                            inserted = True
+                        boxInd += 1
+                    if inserted:
+                        self.tweetboxes = self._loadAllTweets(numTimes=5)
+                        lastNumBoxes = numBoxes
+                        numBoxes = len(self.tweetboxes)
+                        self.logger.info('Completed ' + str(boxInd) + ' tweets, loaded ' + str(numBoxes-lastNumBoxes) + ' more tweets for ' + twitterhandle)
+                self.logger.info('Inserted ' + str(boxInd - 1) + ' tweets for ' + twitterhandle)
+            except Exception as e:
+                traceback.print_exc()
+                traceback.print_stack()
+                self.logger.error('Error scrolling through tweets!')
+                self.logger.error(e)
 
     def _getTweetStats(self, tweetbox):
         """ Gets Tweet information

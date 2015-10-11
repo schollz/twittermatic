@@ -1,5 +1,16 @@
 import random
 
+from datetime import date, datetime, timedelta
+
+def datespan(startDate, endDate, delta=timedelta(days=1)):
+    currentDate = startDate
+    while currentDate < endDate:
+        yield currentDate
+        currentDate += delta
+
+allTwitterDates = []       
+for day in datespan(date(2006,3,21),date.today(),delta=timedelta(days=30)):
+    allTwitterDates.append(str(day))
 
 def convertCondensedNum(strnum):
     strnum = str(strnum)
