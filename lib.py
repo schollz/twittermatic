@@ -451,28 +451,40 @@ class TwitterBot(object):
         database_commands.add(self.tweetinfo['handle'], self.twittername)
         if random.randint(1, 100) <= self.settings['followingProbability']:
             try:
-                self.logger.info('Following')
+                self.logger.info('Following ' + self.tweetinfo['handle'])
                 self._clickFollow(tweetbox)
-            except:
+            except Exception as e:
+                traceback.print_exc()
+                traceback.print_stack()
                 self.logger.error('Error following!')
+                self.logger.error(e)
         if random.randint(1, 100) <= self.settings['favoritingProbability']:
             try:
-                self.logger.info('favoriting')
+                self.logger.info('favoriting ' + self.tweetinfo['handle'])
                 self._clickFavorite(tweetbox)
-            except:
+            except Exception as e:
+                traceback.print_exc()
+                traceback.print_stack()
                 self.logger.error('Error favoriting!')
+                self.logger.error(e)
         if random.randint(1, 100) <= self.settings['retweetingProbability']:
             try:
-                self.logger.info('retweeting')
+                self.logger.info('retweeting ' + self.tweetinfo['handle'])
                 self._clickRetweet(tweetbox)
-            except:
+            except Exception as e:
+                traceback.print_exc()
+                traceback.print_stack()
                 self.logger.error('Error retweeting!')
+                self.logger.error(e)
         if random.randint(1, 100) <= self.settings['replyProbability']:
             try:
-                self.logger.info('replying')
+                self.logger.info('replying ' + self.tweetinfo['handle'])
                 self._clickReply(tweetbox)
-            except:
+            except Exception as e:
+                traceback.print_exc()
+                traceback.print_stack()
                 self.logger.error('Error replying!')
+                self.logger.error(e)
         return False
 
     def _getTweetText(self, tweetbox):
