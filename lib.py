@@ -768,7 +768,14 @@ class TwitterBot(object):
             '.' + 'btn primary-btn tweet-action tweet-btn js-tweet-btn'.replace(' ', '.')).click()
 
 
-    def generateTweet(self,subreddit=None):
+    def generateTweet(self):
+        """ Generates tweet based on on the tweet corpus
+        """
+        if not self.signedIn:
+            self.signin()
+        self.tweet(randomTweet())
+
+    def generateTweet2(self,subreddit=None):
         """ Generates tweet based on something in a Reddit subreddit
 
             @param subreddit    {???} if not used, the config settings will be used

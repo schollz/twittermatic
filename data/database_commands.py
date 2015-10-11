@@ -23,7 +23,7 @@ def get_tweet_by_id(tweet_id):
     results = query.all()
     if len(results) > 0:
         return query.one()
-    else len(results) == 0:
+    else:
         return None
 
 def get_tweet_by_handle(handle):
@@ -131,7 +131,7 @@ def addTweetToHandler(tweet,twitterhandler):
     handles = getHandler(twitterhandler)
     if len(handles) < 1:
         user = {}
-        user['handle'] = twitterhandle
+        user['handle'] = twitterhandler
         user['firstname'] = None
         user['lastname'] = None
         user['location'] = None

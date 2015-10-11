@@ -1,3 +1,5 @@
+import random
+
 
 def convertCondensedNum(strnum):
     strnum = str(strnum)
@@ -9,3 +11,29 @@ def convertCondensedNum(strnum):
         return int(strnum)
 
 
+def randomTweet():
+    C = 1
+    fpath = 'data/tweet_corpus.txt'
+    buffer = []
+
+    f = open(fpath, 'r')
+    for line_num, line in enumerate(f):
+        n = line_num + 1.0
+        r = random.random()
+        if n <= C:
+            buffer.append(line.strip())
+        elif r < C/n:
+            loc = random.randint(0, C-1)
+            buffer[loc] = line.strip()
+    
+    words = []
+    for word in buffer[0].split():
+        if '#' not in word:
+            words.append(word)
+            
+    tweet =' '.join(words).strip()
+    if ('.' != tweet[-1] and
+        '!' != tweet[-1] and
+        '?' != tweet[-1]):
+        tweet = tweet + '.'
+    return tweet
