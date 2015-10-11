@@ -29,6 +29,7 @@ import re
 import logging
 from os import walk
 from time import sleep, time
+import traceback
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -372,7 +373,7 @@ class TwitterBot(object):
         for key in tweet:
             if tweet[key] is not None:
                 try:
-                    tweet[key] = tweet[key].encode('utf-8')
+                    tweet[key] = tweet[key].encode('utf-8').decode('utf-8')
                 except:
                     pass
             
