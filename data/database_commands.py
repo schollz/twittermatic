@@ -69,6 +69,7 @@ def add(repliedhandle, twittername):
             print("ERROR WRITING CACHE")
             session.rollback()
 
+'''
 def addRetweet(repliedhandle, tweet, twittername):
     """ Adds retweet 
 
@@ -86,6 +87,7 @@ def addRetweet(repliedhandle, tweet, twittername):
     except:
         print("ERROR OCCURED WHEN INSERTING RETWEET")
         session.rollback()
+'''
 
 def insertTweet(details, insertDuplicates=True):
     """ Adds tweet to database 

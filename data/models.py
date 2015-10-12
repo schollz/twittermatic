@@ -73,7 +73,7 @@ class Cache(Base):
     def __repr__(self):
         return '<Cache %r>' % (self.repliedhandle)
 
-
+'''
 class Retweet(Base):
     __tablename__ = 'retweets'
     id = Column(Integer, primary_key=True)
@@ -90,3 +90,4 @@ class Retweet(Base):
     def __repr__(self):
         return '<Cache %r>' % (self.repliedhandle)
 
+'''
