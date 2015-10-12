@@ -28,8 +28,6 @@ import os
 import re
 import logging
 from os import walk
-from os import listdir
-from os.path import isfile, join
 from time import sleep, time
 import traceback
 
@@ -113,12 +111,14 @@ class TwitterBot(object):
         
         if self.headless:
             self.driver = None
-            dpath = './drivers/'
-            files = [ f for f in listdir(dpath) if isfile(join(dpath,f)) ]
+            files = []
+            for root, dirnames, filenames in os.walk('./drivers/'):
+                for filename in filenames:
+                    files.append(os.path.join(root, filename))
             for pfile in files:
                 try:
-                    self.driver = webdriver.PhantomJS(executable_path=dpath + pfile, service_log_path="phantomjs.log")
-                    self.logger.error('Using phantomJS driver: ' + pfile)
+                    self.driver = webdriver.PhantomJS(executable_path=pfile, service_log_path="phantomjs.log")
+                    self.logger.info('Using phantomJS driver: ' + pfile)
                 except:
                     self.driver = None
                 if self.driver is not None:
