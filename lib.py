@@ -192,7 +192,7 @@ class TwitterBot(object):
         """
         self.logger.info("Taking a screenshot")
         if not filename:
-            filename = str(time.time())
+            filename = str(time())
         if '.png' not in filename:
             filename += '.png'
         savefile = os.path.join('screenshots', filename)
@@ -274,12 +274,23 @@ class TwitterBot(object):
         lastNum = 0
         newNum = 1
         num = 0
+        self.screenshot('1')
         while lastNum != newNum and num < numTimes:
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            self.driver.execute_script('$("body").scrollTop(10000000);')
+            sleep(.25)
+            self.driver.execute_script('$("html, body").animate({scrollTop: 10000},"slow");')
             sleep(.25)
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(.25)
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
+            sleep(.25)
+            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
+            sleep(.25)
+            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
+            sleep(.25)
+            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
+            sleep(.25)
+            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
             sleep(.25)
             lastNum = newNum
             tweetboxes = self.driver.find_elements(By.CSS_SELECTOR,
@@ -288,6 +299,7 @@ class TwitterBot(object):
             newNum = len(tweetboxes)
             print(newNum)
 
+        self.screenshot('2')
         return tweetboxes
 
     def loadEntireFeed(self):
