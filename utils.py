@@ -9,7 +9,7 @@ def datespan(startDate, endDate, delta=timedelta(days=1)):
         currentDate += delta
 
 allTwitterDates = []       
-for day in datespan(date(2006,3,21),date.today(),delta=timedelta(days=30)):
+for day in datespan(date(2006,3,21),date.today()+timedelta(days=30),delta=timedelta(days=30)):
     allTwitterDates.append(str(day))
 
 def convertCondensedNum(strnum):
