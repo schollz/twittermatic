@@ -275,15 +275,11 @@ class TwitterBot(object):
         newNum = 1
         num = 0
         while lastNum != newNum and num < numTimes:
-
-            self.driver.execute_script(
-                "window.scrollTo(0, document.body.scrollHeight);")
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(.25)
-            self.driver.execute_script(
-                "window.scrollTo(0, document.body.scrollHeight);")
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(.25)
-            self.driver.execute_script(
-                "window.scrollTo(0, document.body.scrollHeight);")
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(.25)
             lastNum = newNum
             tweetboxes = self.driver.find_elements(By.CSS_SELECTOR,
