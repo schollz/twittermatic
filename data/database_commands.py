@@ -22,7 +22,7 @@ def get_tweet_by_id(tweet_id):
     query = session.query(Tweet).filter(Tweet.itemid == tweet_id)
     results = query.all()
     if len(results) > 0:
-        return query.one()
+        return results
     else:
         return None
 
@@ -87,18 +87,17 @@ def addRetweet(repliedhandle, tweet, twittername):
         print("ERROR OCCURED WHEN INSERTING RETWEET")
         session.rollback()
 
-def insertTweet(details, skipDuplicates=True):
+def insertTweet(details, insertDuplicates=True):
     """ Adds tweet to database 
 
         @param details          {Dict} contains tweet details
-        @param skipDuplicates   {Boolean} optional, if true does 
-                                    not insert if tweet already 
-                                    saved
+        @param insertDuplicates   {Boolean} optional, if true it
+                                    will insert even if already exists
     """
     try:
-        if not skipDuplicates:
+        if not insertDuplicates:
             if get_tweet_by_id(details['itemid']) != None:
-                return True
+                return False
         tweet = Tweet(
             twitter_handle=details['handle'], 
             tweet_time=datetime.datetime.utcfromtimestamp(details['time']), 

@@ -28,6 +28,8 @@ import os
 import re
 import logging
 from os import walk
+from os import listdir
+from os.path import isfile, join
 from time import sleep, time
 import traceback
 
@@ -63,6 +65,7 @@ selenium_logger = logging.getLogger(
 selenium_logger.setLevel(logging.WARN)
 
 
+
 class TwitterBot(object):
 
     """TwitterBot object
@@ -84,7 +87,7 @@ class TwitterBot(object):
     logout()              -   Signs out and closes down driver
     """
 
-    def __init__(self, settingsFile, tor=False):
+    def __init__(self, settingsFile, tor=False,headless=False):
         """ Initialize Twitter bot
 
             @param settingsFiles    {String} name of settings file
@@ -96,6 +99,7 @@ class TwitterBot(object):
         self.tor = tor
         self.logger = logging.getLogger(self.settings['file'])
         self.signedIn = False
+        self.headless = headless
         self.twittername = self.settings['twittername']
         self.logger.debug('Initialized')
 
@@ -106,8 +110,26 @@ class TwitterBot(object):
             After signing in it gets new data
         """
         self.logger.debug('Signing in...')
-        self.profile = webdriver.FirefoxProfile()
-        self.driver = webdriver.Firefox(self.profile)
+        
+        if self.headless:
+            self.driver = None
+            dpath = './drivers/'
+            files = [ f for f in listdir(dpath) if isfile(join(dpath,f)) ]
+            for pfile in files:
+                try:
+                    self.driver = webdriver.PhantomJS(executable_path=dpath + pfile, service_log_path="phantomjs.log")
+                    self.logger.error('Using phantomJS driver: ' + pfile)
+                except:
+                    self.driver = None
+                if self.driver is not None:
+                    break
+            if self.driver is None:
+                self.logger.error('Problem loading driver')
+                self.profile = webdriver.FirefoxProfile()
+                self.driver = webdriver.Firefox(self.profile)
+        else:
+            self.profile = webdriver.FirefoxProfile()
+            self.driver = webdriver.Firefox(self.profile)
 
         user = self.settings['username']
         psw = self.settings['password']
@@ -160,6 +182,8 @@ class TwitterBot(object):
         self.logger.debug(self.driver.current_url)
         self.signedIn = loginSuccess
         self._getStats()
+
+
 
     def screenshot(self, filename=None):
         """ Takes a screenshot.
@@ -343,6 +367,7 @@ class TwitterBot(object):
     def collectAllTweets(self, twitterhandle):
         """ Collects all tweets
             Saves tweets to the database.
+            Continues searching until it finds no *new* tweets for 6 consecutive months.
 
             @param twitterhandle     {String} name of users twitter handle
         """
@@ -358,7 +383,9 @@ class TwitterBot(object):
             self.saveTwitterHandle(twitterhandle)
 
         sleep(1)
-        for i in range(len(utils.allTwitterDates)-1):
+        numZeros = 0
+        totalInserted = 0
+        for i in range(len(utils.allTwitterDates)-2,-1,-1):
             try:
                 cmd = 'from:' + twitterhandle + '  since:' + utils.allTwitterDates[i] + ' until:' + utils.allTwitterDates[i+1]
                 self.logger.info('searching: "' + cmd + "'")
@@ -367,23 +394,32 @@ class TwitterBot(object):
                 lastNumBoxes = 0
                 self.tweetboxes = self._loadAllTweets(numTimes=5)
                 numBoxes = len(self.tweetboxes)
-                inserted = True
-                while lastNumBoxes != numBoxes and inserted:
-                    while boxInd < len(self.tweetboxes) and inserted:
+                numInserted = 0
+                while lastNumBoxes != numBoxes:
+                    while boxInd < len(self.tweetboxes):
                         tweetbox = self.tweetboxes[boxInd]
+                        inserted = False
                         try:
                             tweet = self._getTweetStats(tweetbox)
                             tweet['handle'] = twitterhandle
-                            inserted = database_commands.insertTweet(tweet)
+                            inserted = database_commands.insertTweet(tweet,insertDuplicates=False)
+                            if inserted:
+                                numInserted += 1
                         except:
-                            inserted = True
+                            pass
                         boxInd += 1
-                    if inserted:
-                        self.tweetboxes = self._loadAllTweets(numTimes=5)
-                        lastNumBoxes = numBoxes
-                        numBoxes = len(self.tweetboxes)
-                        self.logger.info('Completed ' + str(boxInd) + ' tweets, loaded ' + str(numBoxes-lastNumBoxes) + ' more tweets for ' + twitterhandle)
-                self.logger.info('Inserted ' + str(boxInd - 1) + ' tweets for ' + twitterhandle)
+                    self.tweetboxes = self._loadAllTweets(numTimes=5)
+                    lastNumBoxes = numBoxes
+                    numBoxes = len(self.tweetboxes)
+                    self.logger.info('Inserted ' + str(numInserted) + ' tweets, loaded ' + str(numBoxes-lastNumBoxes) + ' more tweets for ' + twitterhandle)
+                if numInserted == 0:
+                    numZeros += 1
+                else:
+                    numZeros = 0
+                if numZeros > 6:
+                    break
+                totalInserted += numInserted
+                self.logger.info('Inserted ' + str(totalInserted) + ' TOTAL tweets for ' + twitterhandle + '. Zeros in-a-row: ' + str(numZeros))
             except Exception as e:
                 traceback.print_exc()
                 traceback.print_stack()
@@ -933,8 +969,9 @@ python
 from lib import *
 bot = TwitterBot('stefans.json')
 
-bot = TwitterBot('test.json')
-bot.makefriends()
+
+bot = TwitterBot('musicsuggestions.json',headless=True)
+bot.collectAllTweets('potus')
 
 from lib import *
 python
