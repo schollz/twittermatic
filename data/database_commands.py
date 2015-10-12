@@ -69,26 +69,6 @@ def add(repliedhandle, twittername):
             print("ERROR WRITING CACHE")
             session.rollback()
 
-'''
-def addRetweet(repliedhandle, tweet, twittername):
-    """ Adds retweet 
-
-        @param repliedhandle    {String} handle of user
-        @param twittername      {String} handle of current user
-        @param tweet            {String} text of tweet
-    """
-    print ("-"*30)
-    print(tweet)
-    print ("-"*30)
-    try:
-        retweet = Retweet(twittername,repliedhandle,tweet)
-        session.add(retweet)
-        session.commit()
-    except:
-        print("ERROR OCCURED WHEN INSERTING RETWEET")
-        session.rollback()
-'''
-
 def insertTweet(details, insertDuplicates=True):
     """ Adds tweet to database 
 

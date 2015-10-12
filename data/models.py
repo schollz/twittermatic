@@ -72,22 +72,3 @@ class Cache(Base):
 
     def __repr__(self):
         return '<Cache %r>' % (self.repliedhandle)
-
-'''
-class Retweet(Base):
-    __tablename__ = 'retweets'
-    id = Column(Integer, primary_key=True)
-    twittername = Column(String(50), unique=False)
-    repliedhandle = Column(String(50), unique=False)
-    text = Column(String(150), unique=False)
-    Timestamp =Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
-
-    def __init__(self, twittername=None, repliedhandle=None, text=None):
-        self.twittername = twittername
-        self.repliedhandle = repliedhandle
-        self.text = text
-
-    def __repr__(self):
-        return '<Cache %r>' % (self.repliedhandle)
-
-'''
