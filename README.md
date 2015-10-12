@@ -1,8 +1,8 @@
 # YATA (Yet Another Twitter Automator)
 
-This bot seeks to help users automate Twitter activities (friending, searching, unfollowing) *without the use of API keys!* Instead, this bot is completely based of [Selenium for Python](https://github.com/SeleniumHQ/selenium).
+This set of Python classes helps to perform all sorts of Twitter activities, *without the use of API keys!* Instead, this utility is completely based of [Selenium for Python](https://github.com/SeleniumHQ/selenium). As such, any program using these tools is not restricted to any of the Twitter API limits - [retrieving a max of 3,200 statuses, aggressive following](https://dev.twitter.com/overview/general/things-every-developer-should-know). 
 
-This program keeps track of tweets, retweets and interactions using a database managed by SQLAlchemy.
+What can YATA do?  You can [download a users entire Twitter feed](#Collect latest tweets from somebody), you can [download only the latest tweets)[# Collect latest tweets from somebody], [search for '#cats' and follow/retweet/reply/favorite those tweets](# Do a live search for #cats and retweet at those handles), [tweet stuff](# Tweet something), among some things. A full list of available functions are [listed below](# Features).
 
 ## Installation
 
@@ -15,11 +15,9 @@ Copy the config file into the ```data``` folder and edit it with your login deta
 cp default.json ./data/default.json
 ```
 
-
-
 ## Usage
 
-## ```makefriends()```
+### ```makefriends()```
 
 The function ```makefriends()``` is a special function that does a lot of automation based only on your configuration file. The ```default.json``` config file looks like:
 
@@ -69,14 +67,25 @@ Then the bot will do the following:
 
 Another neat feature of ```makefriends()``` - if your bot signs in and it sees it has more than 1,800 followers, then it will automatically use ```unfollow()``` to unfollow some of them.
 
-### Collect tweets from somebody
+### Collect ALL tweets from somebody
 
 The following code will collect someones tweets. It will run until it has found that it already collected that tweet, so on the first time it will take awhile especially if that perseon has a ton of tweets.
 
 ```python
 from lib import *
 
-bot = TwitterBot('default.json') # Load bot
+bot = TwitterBot('default.json') 
+bot.collectAllTweets('scotus') 
+```
+
+### Collect latest tweets from somebody
+
+The following code will collect someone's tweets. It will run until it has found that it already collected that tweet, so on the first time it will take awhile especially if that person has a ton of tweets.
+
+```python
+from lib import *
+
+bot = TwitterBot('default.json')
 bot.collectTweets('scotus') 
 ```
 
