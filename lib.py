@@ -97,6 +97,7 @@ class TwitterBot(object):
         self.tor = tor
         self.logger = logging.getLogger(self.settings['file'])
         self.signedIn = False
+        self.phantom = False
         self.headless = headless
         self.twittername = self.settings['twittername']
         self.logger.debug('Initialized')
@@ -119,15 +120,18 @@ class TwitterBot(object):
                 try:
                     self.driver = webdriver.PhantomJS(executable_path=pfile, service_log_path="phantomjs.log")
                     self.logger.info('Using phantomJS driver: ' + pfile)
+                    self.phantom = True
                 except:
                     self.driver = None
                 if self.driver is not None:
                     break
             if self.driver is None:
+                self.phantom = False
                 self.logger.error('Problem loading driver')
                 self.profile = webdriver.FirefoxProfile()
                 self.driver = webdriver.Firefox(self.profile)
         else:
+            self.phantom = False
             self.profile = webdriver.FirefoxProfile()
             self.driver = webdriver.Firefox(self.profile)
 
@@ -274,23 +278,18 @@ class TwitterBot(object):
         lastNum = 0
         newNum = 1
         num = 0
-        self.screenshot('1')
         while lastNum != newNum and num < numTimes:
+            '''
             self.driver.execute_script('$("body").scrollTop(10000000);')
             sleep(.25)
             self.driver.execute_script('$("html, body").animate({scrollTop: 10000},"slow");')
             sleep(.25)
+            '''
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(.25)
-            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(.25)
-            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
-            sleep(.25)
-            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
-            sleep(.25)
-            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
-            sleep(.25)
-            self.driver.find_element_by_id("doc").send_keys(Keys.PAGE_DOWN);
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(.25)
             lastNum = newNum
             tweetboxes = self.driver.find_elements(By.CSS_SELECTOR,
@@ -299,7 +298,6 @@ class TwitterBot(object):
             newNum = len(tweetboxes)
             print(newNum)
 
-        self.screenshot('2')
         return tweetboxes
 
     def loadEntireFeed(self):
@@ -395,9 +393,15 @@ class TwitterBot(object):
         sleep(1)
         numZeros = 0
         totalInserted = 0
-        for i in range(len(utils.allTwitterDates)-2,-1,-1):
+        twitterDates = utils.allTwitterDates
+        drySpan = 6
+        if self.phantom:
+            twitterDates = utils.allTwitterDatesByDay
+            drySpan = 180
+            
+        for i in range(len(twitterDates)-2,-1,-1):
             try:
-                cmd = 'from:' + twitterhandle + '  since:' + utils.allTwitterDates[i] + ' until:' + utils.allTwitterDates[i+1]
+                cmd = 'from:' + twitterhandle + '  since:' + twitterDates[i] + ' until:' + twitterDates[i+1]
                 self.logger.info('searching: "' + cmd + "'")
                 self.liveSearch(cmd)
                 boxInd = 0
@@ -426,7 +430,7 @@ class TwitterBot(object):
                     numZeros += 1
                 else:
                     numZeros = 0
-                if numZeros > 6:
+                if numZeros > drySpan:
                     break
                 totalInserted += numInserted
                 self.logger.info('Inserted ' + str(totalInserted) + ' TOTAL tweets for ' + twitterhandle + '. Zeros in-a-row: ' + str(numZeros))

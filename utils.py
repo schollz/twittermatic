@@ -12,6 +12,10 @@ allTwitterDates = []
 for day in datespan(date(2006,3,21),date.today()+timedelta(days=30),delta=timedelta(days=30)):
     allTwitterDates.append(str(day))
 
+allTwitterDatesByDay = []       
+for day in datespan(date(2006,3,21),date.today()+timedelta(days=1),delta=timedelta(days=1)):
+    allTwitterDatesByDay.append(str(day))
+
 def convertCondensedNum(strnum):
     strnum = str(strnum)
     if 'K' in strnum:
