@@ -67,20 +67,10 @@ Then the bot will do the following:
 
 Another neat feature of ```makefriends()``` - if your bot signs in and it sees it has more than 1,800 followers, then it will automatically use ```unfollow()``` to unfollow some of them.
 
-### Collect ALL tweets from somebody
-
-The following code will collect someones tweets. It will run until it has found that it already collected that tweet, so on the first time it will take awhile especially if that perseon has a ton of tweets.
-
-```python
-from lib import *
-
-bot = TwitterBot('default.json') 
-bot.collectAllTweets('scotus') 
-```
 
 ### Collect latest tweets from somebody
 
-The following code will collect someone's tweets. It will run until it has found that it already collected that tweet, so on the first time it will take awhile especially if that person has a ton of tweets.
+The following code will collect someone's tweets. The first time it runs it will collect **all** of that user's tweets. *All of them*. It takes about an hours per 10,000 tweets. On subsequent runs it will capture the neweset tweets, and then stop when it discoveres it already has the rest.
 
 ```python
 from lib import *
