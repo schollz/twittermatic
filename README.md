@@ -2,7 +2,7 @@
 
 This set of Python classes helps to perform all sorts of Twitter activities, *without the use of API keys!* Instead, this utility is completely based of [Selenium for Python](https://github.com/SeleniumHQ/selenium). As such, any program using these tools is not restricted to any of the Twitter API limits - [retrieving a max of 3,200 statuses, aggressive following](https://dev.twitter.com/overview/general/things-every-developer-should-know) and the only thing you need is a Twitter Login.
 
-What can YATA do?  You can [download a users entire Twitter feed](#collect-latest-tweets-from-somebody), you can [download only the latest tweets)[# Collect latest tweets from somebody], [search for '#cats' and follow/retweet/reply/favorite those tweets](# Do a live search for #cats and retweet at those handles), [tweet stuff](# Tweet something), among some things. A full list of available functions are [listed below](# Features). Now includes bundled support for [PhantomJS](http://phantomjs.org/)!
+What can YATA do?  You can [download a users entire Twitter feed](#collect-latest-tweets-from-somebody), [search a keyword and follow/retweet/reply/favorite those tweets](#do-a-live-search-for-cats-and-retweet-at-those-handles), [tweet stuff](#tweet-something), among some things. A full list of available functions are [listed below](#features). Now includes bundled support for [PhantomJS](http://phantomjs.org/)!
 
 ## Installation
 
@@ -93,7 +93,7 @@ This will save all the tweets in a database ```data/tweets.db``` in a table call
 
 **New feature** - if you'd like to use Phantom, simply set ```headless``` to ```True``` and it will automatically use the correct Phantom driver!.
 
-### Do a live search for #cats and retweet at those handles
+### Do a live search for cats and retweet at those handles
 
 This will go through and search for ```#cats``` and retweet, reply, and favorite the tweets depending on your set probabilities in ```default.json```.
 
