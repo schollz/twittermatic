@@ -1,8 +1,8 @@
 # YATA (Yet Another Twitter Automator)
 
-This set of Python classes helps to perform all sorts of Twitter activities, *without the use of API keys!* Instead, this utility is completely based of [Selenium for Python](https://github.com/SeleniumHQ/selenium). As such, any program using these tools is not restricted to any of the Twitter API limits - [retrieving a max of 3,200 statuses, aggressive following](https://dev.twitter.com/overview/general/things-every-developer-should-know). 
+This set of Python classes helps to perform all sorts of Twitter activities, *without the use of API keys!* Instead, this utility is completely based of [Selenium for Python](https://github.com/SeleniumHQ/selenium). As such, any program using these tools is not restricted to any of the Twitter API limits - [retrieving a max of 3,200 statuses, aggressive following](https://dev.twitter.com/overview/general/things-every-developer-should-know) and the only thing you need is a Twitter Login.
 
-What can YATA do?  You can [download a users entire Twitter feed](#Collect latest tweets from somebody), you can [download only the latest tweets)[# Collect latest tweets from somebody], [search for '#cats' and follow/retweet/reply/favorite those tweets](# Do a live search for #cats and retweet at those handles), [tweet stuff](# Tweet something), among some things. A full list of available functions are [listed below](# Features).
+What can YATA do?  You can [download a users entire Twitter feed](#collect-latest-tweets-from-somebody), you can [download only the latest tweets)[# Collect latest tweets from somebody], [search for '#cats' and follow/retweet/reply/favorite those tweets](# Do a live search for #cats and retweet at those handles), [tweet stuff](# Tweet something), among some things. A full list of available functions are [listed below](# Features). Now includes bundled support for [PhantomJS](http://phantomjs.org/)!
 
 ## Installation
 
@@ -85,11 +85,13 @@ The following code will collect someone's tweets. It will run until it has found
 ```python
 from lib import *
 
-bot = TwitterBot('default.json')
+bot = TwitterBot('default.json',headless=False)
 bot.collectTweets('scotus') 
 ```
 
 This will save all the tweets in a database ```data/tweets.db``` in a table called ```tweets``` with all the Twitter user information in a relational table ```handlers```.
+
+**New feature** - if you'd like to use Phantom, simply set ```headless``` to ```True``` and it will automatically use the correct Phantom driver!.
 
 ### Do a live search for #cats and retweet at those handles
 
@@ -168,9 +170,11 @@ Here is a list of the current public functions accessible from the ```TwitterBot
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
 
+Note, that to profile the elements in the DOM, its very useful to use [Firefox Firebug](http://getfirebug.com/).
+
 ## History
 
-TODO: Write history
+- 10/12/2015: Added PhantomJS support
 
 ## Credits
 
