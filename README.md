@@ -193,3 +193,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+﻿-----
+
+> **WARNING**
+> `git rebase -i` and `git push --force` may be run on this branch at any point of time because I'm mad and evil!
+
+-----
+
+[![Build Status][travis-badge]][travis-page] [![Coverage Status][coveralls-badge]][coveralls-page] [![Gitter][gitter-image]][gitter-page] ![Project Status][project-pre-alpha-badge]
