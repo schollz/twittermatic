@@ -839,6 +839,27 @@ class TwitterBot(object):
                     button.click()
                     sleep(.5)
 
+    def getFollowers(self,twitterhandle):
+        """Follow anyone that is following you"""
+
+        if not self.signedIn:
+            self.signin()
+
+        self.driver.get(
+            "http://www.twitter.com/" + twitterhandle + '/followers')
+
+        for i in range(1000):
+            self.driver.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight);")
+            sleep(.05)
+
+        css = "u-linkComplex-target"
+        css = '.' + css.replace(' ', '.')
+        followers = self.driver.find_elements(By.CSS_SELECTOR, css)
+        print(len(followers))
+        #for follower in followers:
+        #    print(follower.text)
+
     def _typeLikeHuman(self, element, text, enter=False):
         """ Types slowly like a human would
 
