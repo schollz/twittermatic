@@ -266,7 +266,7 @@ class TwitterBot(object):
             self.tweetboxes = self._loadAllTweets(numTimes=1)
             self.processFeed()
 
-    def _loadAllTweets(self, numTimes=1000):
+    def _loadAllTweets(self, numTimes=10000):
         """ Loads all the available tweets
         
             When searching or loading feed, you can use this function 
@@ -440,6 +440,38 @@ class TwitterBot(object):
                 self.logger.error('Error scrolling through tweets!')
                 self.logger.error(e)
 
+                
+    def countAllTweets(self, subject):
+        """ Collects all tweets
+            Saves tweets to the database.
+            Continues searching until it finds no *new* tweets for 6 consecutive months.
+
+            @param twitterhandle     {String} name of users twitter handle
+        """
+        if not self.signedIn:
+            self.signin()
+
+        sleep(1)
+        numZeros = 0
+        totalInserted = 0
+        twitterDates = utils.allTwitterDates
+        drySpan = 300
+        twitterDates = utils.allTwitterDatesByDay
+            
+        for i in range(len(twitterDates)-2,-1,-1):
+            try:
+                cmd = subject + '  since:' + twitterDates[i] + ' until:' + twitterDates[i+1]
+                self.logger.info('searching: "' + cmd + "'")
+                self.liveSearch(cmd)
+                self.tweetboxes = self._loadAllTweets()
+                numBoxes = len(self.tweetboxes)
+                self.logger.info('Counted ' + str(numBoxes))
+            except Exception as e:
+                traceback.print_exc()
+                traceback.print_stack()
+                self.logger.error('Error scrolling through tweets!')
+                self.logger.error(e)
+                
     def _getTweetStats(self, tweetbox):
         """ Gets Tweet information
 
