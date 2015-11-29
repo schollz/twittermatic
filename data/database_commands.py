@@ -78,7 +78,9 @@ def insertTweet(details, insertDuplicates=True):
     """
     try:
         if not insertDuplicates:
-            if get_tweet_by_id(details['itemid']) != None:
+            tweet_results = get_tweet_by_id(details['itemid'])
+            if tweet_results != None:
+                logger.info(tweet_results)
                 return False
         tweet = Tweet(
             twitter_handle=details['handle'], 
