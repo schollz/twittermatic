@@ -2,6 +2,7 @@
 import logging
 import datetime
 import traceback
+import datetime
 from data.models import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -52,7 +53,19 @@ def hasHandle(repliedhandle, twittername):
     """
     query = session.query(Cache).filter(Cache.repliedhandle == repliedhandle).filter(Cache.twittername == twittername)
     results = query.all()
-    return len(results) > 0
+    logger.info(repliedhandle)
+    if len(results)>0:
+        minDays = 100000
+        for i in range(len(results)):
+            logger.info(results[i].Timestamp)
+            diffDays = (datetime.datetime.now()-results[i].Timestamp).days
+            if diffDays < minDays:
+                minDays = diffDays
+        if minDays > 7:
+            return False
+        else:
+            return True
+    return False
 
 def add(repliedhandle, twittername):
     """ Add to cache 
