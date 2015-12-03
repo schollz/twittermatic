@@ -243,6 +243,7 @@ class TwitterBot(object):
             Goes through tweets and follows/favorites/retweets/replies 
             based on probabilities
         """
+        logger = logging.getLogger('lib.makefriends')
         if not self.signedIn:
             self.signin()
 
@@ -260,10 +261,12 @@ class TwitterBot(object):
                 days=1)).strftime("%Y-%m-%d") + ' until:' + (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d"))
 
         for search_term in search_terms:
-            self.logger.info(
+            logger.info(
                 'Seeking out [' + search_term + '] for ' + self.settings['twittername'])
             self.liveSearch(search_term)
+            logger.debug('Loading all tweets')
             self.tweetboxes = self._loadAllTweets(numTimes=1)
+            logger.debug('Processing feed')
             self.processFeed()
 
     def _loadAllTweets(self, numTimes=10000):
@@ -478,6 +481,7 @@ class TwitterBot(object):
             @param tweetbox     {WebElement} Selenium element of tweet
             @returns tweet      {Dict} contains tweet text, time, type, itemid, favorites, retweets
         """
+        logger = logging.getLogger('_getTweetStats')
         tweet = {}
         fulltext = tweetbox.text
         tstart = time()
@@ -490,16 +494,20 @@ class TwitterBot(object):
         tweet['type'] = tweetbox.get_attribute("data-item-type")
         tweet['itemid'] = tweetbox.get_attribute("data-item-id")
         words = fulltext.split('\n')
+        logger.debug('Full tweet text: ' + " ".join(words))
+
         try:
             tweet['favorites'] = utils.convertCondensedNum(
-                words[words.index('Retweet') + 1])
+                words[words.index('Like') + 1])
         except:
             tweet['favorites'] = -1
         try:
             tweet['retweets'] = utils.convertCondensedNum(
-                words[words.index('Favorite') + 1])
+                words[words.index('Retweet') + 1])
         except:
             tweet['retweets'] = -1
+
+        logger.debug("Tweet stats: " + json.dumps(tweet))
             
         # Get rid of weird characters
         for key in tweet:
@@ -547,6 +555,7 @@ class TwitterBot(object):
             self.logger.error('Problem with searching')
 
     def processFeed(self):
+        logger = logging.getLogger('lib.processFeed')
         for tweetbox in self.tweetboxes:
             self.tweetbox = tweetbox
             tweetbox_text = tweetbox.text.split()
@@ -556,20 +565,23 @@ class TwitterBot(object):
 
             # check if you need to avoid this person
             tstart = time()
+            logger.debug('Getting tweet stats')
             self.tweetinfo = self._getTweetStats(tweetbox)
             tstart = time()
+            logger.debug('Checking whether to process tweet')
             if self.tweetinfo['handle'] is not None and not database_commands.hasHandle(self.tweetinfo['handle'], self.twittername):
 
                 for word in self.settings['avoid_words']:
                     if word in tweetbox_text:
                         dontEngage = True
-                        self.logger.info("need to avoid " + word)
+                        logger.info("need to avoid " + word)
                         break
 
                 if not dontEngage:
+                    logger.debug('Processing tweet')
                     problem = self._processTweet(tweetbox)
                 else:
-                    self.logger.info('Already interacted with ' + self.tweetinfo[
+                    logger.info('Already interacted with ' + self.tweetinfo[
                                      'handle'] + ' in ' + str(time() - tstart))
 
     def _processTweet(self, tweetbox):
@@ -580,17 +592,9 @@ class TwitterBot(object):
         """
         self.driver.execute_script(
             "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
-
+        self.logger.info('Adding ' + self.tweetinfo['handle'] + ' to db')
         database_commands.add(self.tweetinfo['handle'], self.twittername)
-        if random.randint(1, 100) <= self.settings['favoritingProbability']:
-            try:
-                self.logger.info('favoriting ' + self.tweetinfo['handle'])
-                self._clickFavorite(tweetbox)
-            except Exception as e:
-                traceback.print_exc()
-                traceback.print_stack()
-                self.logger.error('Error favoriting!')
-                self.logger.error(e)
+        self.logger.debug('Trying to Follow')
         if random.randint(1, 100) <= self.settings['followingProbability']:
             try:
                 self.logger.info('Following ' + self.tweetinfo['handle'])
@@ -599,6 +603,15 @@ class TwitterBot(object):
                 traceback.print_exc()
                 traceback.print_stack()
                 self.logger.error('Error following!')
+                self.logger.error(e)
+        if random.randint(1, 100) <= self.settings['favoritingProbability']:
+            try:
+                self.logger.info('favoriting ' + self.tweetinfo['handle'])
+                self._clickFavorite(tweetbox)
+            except Exception as e:
+                traceback.print_exc()
+                traceback.print_stack()
+                self.logger.error('Error favoriting!')
                 self.logger.error(e)
         if random.randint(1, 100) <= self.settings['retweetingProbability']:
             try:
