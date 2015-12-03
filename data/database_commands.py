@@ -51,13 +51,13 @@ def hasHandle(repliedhandle, twittername):
         @param repliedhandle    {String} handle of user
         @param twittername      {String} handle of current user
     """
+    logger = logging.getLogger('database_commands.hasHandle')
     query = session.query(Cache).filter(Cache.repliedhandle == repliedhandle).filter(Cache.twittername == twittername)
     results = query.all()
-    logger.info(repliedhandle)
     if len(results)>0:
         minDays = 100000
         for i in range(len(results)):
-            logger.info(results[i].Timestamp)
+            logger.debug('Responded to ' + repliedhandle + ' on ' + str(results[i].Timestamp))
             diffDays = (datetime.datetime.now()-results[i].Timestamp).days
             if diffDays < minDays:
                 minDays = diffDays
@@ -65,6 +65,7 @@ def hasHandle(repliedhandle, twittername):
             return False
         else:
             return True
+    logger.debug('Responded to ' + repliedhandle + ' on ' + str(results[i].Timestamp))
     return False
 
 def add(repliedhandle, twittername):
