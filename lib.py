@@ -246,7 +246,7 @@ class TwitterBot(object):
         if not self.signedIn:
             self.signin()
 
-        if self.settings['following'] > 1800:
+        if self.settings['following'] > 1900:
             self.unfollow()
 
         # Generate search terms
@@ -582,15 +582,6 @@ class TwitterBot(object):
             "window.scrollTo(0, %s);" % str(tweetbox.location['y'] + 100))
 
         database_commands.add(self.tweetinfo['handle'], self.twittername)
-        if random.randint(1, 100) <= self.settings['followingProbability']:
-            try:
-                self.logger.info('Following ' + self.tweetinfo['handle'])
-                self._clickFollow(tweetbox)
-            except Exception as e:
-                traceback.print_exc()
-                traceback.print_stack()
-                self.logger.error('Error following!')
-                self.logger.error(e)
         if random.randint(1, 100) <= self.settings['favoritingProbability']:
             try:
                 self.logger.info('favoriting ' + self.tweetinfo['handle'])
@@ -599,6 +590,15 @@ class TwitterBot(object):
                 traceback.print_exc()
                 traceback.print_stack()
                 self.logger.error('Error favoriting!')
+                self.logger.error(e)
+        if random.randint(1, 100) <= self.settings['followingProbability']:
+            try:
+                self.logger.info('Following ' + self.tweetinfo['handle'])
+                self._clickFollow(tweetbox)
+            except Exception as e:
+                traceback.print_exc()
+                traceback.print_stack()
+                self.logger.error('Error following!')
                 self.logger.error(e)
         if random.randint(1, 100) <= self.settings['retweetingProbability']:
             try:
@@ -717,7 +717,7 @@ class TwitterBot(object):
         buttons = tweetbox.find_elements(By.CSS_SELECTOR, css)
         button_num = 0
         for button in buttons:
-            if ("Favorite" == button.text.split('\n')[0]):
+            if ("Like" == button.text.split('\n')[0]):
                 button.click()
                 sleep(0.1)
                 self.logger.debug('Favorited ' + self.tweetinfo['handle'])
