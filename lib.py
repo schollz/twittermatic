@@ -489,9 +489,13 @@ class TwitterBot(object):
             if '@' in text and len(text) > 4:
                 tweet['handle'] = text
                 break
+        logger.debug('Getting tweet text')
         tweet['text'] = self._getTweetText(tweetbox)
+        logger.debug('Getting tweet time')
         tweet['time'] = self._getTweetTime(tweetbox)
+        logger.debug('Getting tweet type')
         tweet['type'] = tweetbox.get_attribute("data-item-type")
+        logger.debug('Getting tweet itemid')
         tweet['itemid'] = tweetbox.get_attribute("data-item-id")
         words = fulltext.split('\n')
         logger.debug('Full tweet text: ' + " ".join(words))

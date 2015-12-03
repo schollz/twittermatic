@@ -65,7 +65,7 @@ def hasHandle(repliedhandle, twittername):
             return False
         else:
             return True
-    logger.debug('Responded to ' + repliedhandle + ' on ' + str(results[i].Timestamp))
+    logger.debug('Never responded to ' + repliedhandle)
     return False
 
 def add(repliedhandle, twittername):
