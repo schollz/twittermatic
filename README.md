@@ -32,7 +32,7 @@ The function ```makefriends()``` is a special function that does a lot of automa
     "favoritingProbability": 50,
     "followingProbability": 50,
     "search_expressions": [
-        "#cats",
+        "#cats"
     ],
     "search_avoid_words": [
         "dog"
