@@ -208,25 +208,26 @@ class TwitterBot(object):
             Goes to following page and unfollows 60% of followers,
             skipping the first 600.
         """
+        logger = logging.getLogger('lib.unfollow')
         if not self.signedIn:
             self.signin()
 
+        logger.info('unfollowing...')
         self.driver.get(
             "http://www.twitter.com/" + self.settings['twittername'] + '/following')
-
         for i in range(60):
             self.driver.execute_script(
                 "window.scrollTo(0, document.body.scrollHeight);")
             sleep(.2)
-
+        logger.info('finished loading')
         skip = 0
         blocks = self.driver.find_elements(
             By.CSS_SELECTOR, ".Grid-cell.u-size1of2.u-lg-size1of3.u-mb10")
         for block in blocks:
             text = str(block.text.encode('ascii', 'ignore'))
+            logger.debug(text)
             skip += 1
-            if ('FOLLOWS YOU' not in text or
-                    random.randint(1, 100) <= 0.6) and skip > 600:
+            if 'FOLLOWS YOU' not in text and skip > 200:
                 css = '.' + \
                     'user-actions-follow-button js-follow-btn follow-button btn small small-follow-btn'.replace(
                         ' ', '.')
@@ -258,14 +259,14 @@ class TwitterBot(object):
         search_terms = []
         for exp in search_expressions:
             search_terms.append('"' + exp + '" ' + '-' + ' -'.join(search_avoid_words) + ' since:' + (datetime.now() - timedelta(
-                days=1)).strftime("%Y-%m-%d") + ' until:' + (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d"))
+                days=2)).strftime("%Y-%m-%d") + ' until:' + (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d"))
 
         for search_term in search_terms:
             logger.info(
                 'Seeking out [' + search_term + '] for ' + self.settings['twittername'])
             self.liveSearch(search_term)
             logger.debug('Loading all tweets')
-            self.tweetboxes = self._loadAllTweets(numTimes=1)
+            self.tweetboxes = self._loadAllTweets(numTimes=20)
             logger.debug('Processing feed')
             self.processFeed()
 
