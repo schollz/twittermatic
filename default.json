@@ -1,0 +1,25 @@
+{
+    "username": "YOUR USERNAME",
+    "twittername": "YOUR TWITTER HANDLE",
+    "password": "YOUR PASSWORD",
+    "topResults": false,
+    "retweetingProbability": 50,
+    "replyProbability": 50,
+    "favoritingProbability": 50,
+    "followingProbability": 50,
+    "search_expressions": [
+        "#cats"
+    ],
+    "search_avoid_words": [
+        "dog"
+    ],
+    "avoid_words": [
+        "dog"
+    ],
+    "replies": [
+        "I love cats!",
+        "Cool!",
+        "Awesome",
+        ":)"
+    ]
+}
