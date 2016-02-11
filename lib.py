@@ -78,7 +78,7 @@ class TwitterBot(object):
     liveSearch(term)      -   Loads all the tweets that match search term
     loadEntireFeed()      -   After doing a search, this can be used to load the entire feed
     processFeed()         -   After using liveSearch(term) you can use this to process the tweets in feed
-    makefriends()         -   Follow/Favorite/Reply/Retweet in bulk using search terms 
+    makefriends()         -   Follow/Favorite/Reply/Retweet in bulk using search terms
                                 (does liveSearch + loadEntireFeed + processFeed)
     tweet(text)           -   Tweets the given text
     generateTweet()       -   Generates a tweet from the corpus
@@ -109,7 +109,7 @@ class TwitterBot(object):
             After signing in it gets new data
         """
         self.logger.debug('Signing in...')
-        
+
         if self.headless:
             self.driver = None
             files = []
@@ -239,9 +239,9 @@ class TwitterBot(object):
 
     def makefriends(self):
         """ Follow/Favorite/Retweet/Reply in bulk
-        
+
             Searches for specified search terms (in configuration)
-            Goes through tweets and follows/favorites/retweets/replies 
+            Goes through tweets and follows/favorites/retweets/replies
             based on probabilities
         """
         logger = logging.getLogger('lib.makefriends')
@@ -272,9 +272,9 @@ class TwitterBot(object):
 
     def _loadAllTweets(self, numTimes=10000):
         """ Loads all the available tweets
-        
-            When searching or loading feed, you can use this function 
-            load tweets by continuing scrolling to the bottom until no 
+
+            When searching or loading feed, you can use this function
+            load tweets by continuing scrolling to the bottom until no
             more tweets load (or numTimes reached)
 
             @param numTimes     {Integer} number of times to scroll??
@@ -306,9 +306,9 @@ class TwitterBot(object):
 
     def loadEntireFeed(self):
         """Loads an entire feed, be careful this could take awhile sometimes"""
-        
+
         self.tweetboxes = self._loadAllTweets()
-        
+
     def saveTwitterHandle(self,twitterhandle):
         self.driver.get("http://www.twitter.com/" + twitterhandle)
         name = self.driver.find_element(By.CSS_SELECTOR,"a.ProfileHeaderCard-nameLink").text.split()
@@ -319,7 +319,7 @@ class TwitterBot(object):
         bio = self.driver.find_element(By.CSS_SELECTOR,"p.ProfileHeaderCard-bio").text
         user = {}
         user['handle'] = twitterhandle
-        user['firstname'] = name[0] 
+        user['firstname'] = name[0]
         user['lastname'] = name[1]
         user['location'] = location
         user['website'] = website
@@ -375,7 +375,7 @@ class TwitterBot(object):
 
         self.logger.info(
             'Inserted ' + str(boxInd - 1) + ' tweets for ' + twitterhandle)
-            
+
     def collectAllTweets(self, twitterhandle):
         """ Collects all tweets
             Saves tweets to the database.
@@ -402,7 +402,7 @@ class TwitterBot(object):
         if self.phantom:
             twitterDates = utils.allTwitterDatesByDay
             drySpan = 180
-            
+
         for i in range(len(twitterDates)-2,-1,-1):
             try:
                 cmd = 'from:' + twitterhandle + '  since:' + twitterDates[i] + ' until:' + twitterDates[i+1]
@@ -444,7 +444,7 @@ class TwitterBot(object):
                 self.logger.error('Error scrolling through tweets!')
                 self.logger.error(e)
 
-                
+
     def countAllTweets(self, subject):
         """ Collects all tweets
             Saves tweets to the database.
@@ -461,7 +461,7 @@ class TwitterBot(object):
         twitterDates = utils.allTwitterDates
         drySpan = 300
         twitterDates = utils.allTwitterDatesByDay
-            
+
         for i in range(len(twitterDates)-2,-1,-1):
             try:
                 cmd = subject + '  since:' + twitterDates[i] + ' until:' + twitterDates[i+1]
@@ -475,7 +475,7 @@ class TwitterBot(object):
                 traceback.print_stack()
                 self.logger.error('Error scrolling through tweets!')
                 self.logger.error(e)
-                
+
     def _getTweetStats(self, tweetbox):
         """ Gets Tweet information
 
@@ -513,7 +513,7 @@ class TwitterBot(object):
             tweet['retweets'] = -1
 
         logger.debug("Tweet stats: " + json.dumps(tweet))
-            
+
         # Get rid of weird characters
         for key in tweet:
             if tweet[key] is not None:
@@ -521,7 +521,7 @@ class TwitterBot(object):
                     tweet[key] = tweet[key].encode('utf-8').decode('utf-8')
                 except:
                     pass
-            
+
         return tweet
 
     def liveSearch(self, search_term):
@@ -548,8 +548,13 @@ class TwitterBot(object):
                 pass
         sleep(1)
         if not self.settings['topResults']:
-            self.driver.find_element_by_css_selector(
-                '.AdaptiveFiltersBar-target.AdaptiveFiltersBar-target--more.u-textUserColor.js-dropdown-toggle').click()
+            try:
+                self.driver.find_element_by_css_selector(
+                    '.AdaptiveFiltersBar-target.AdaptiveFiltersBar-target--more.u-textUserColor.js-dropdown-toggle').click()
+            except:
+                sleep(3)
+                self.driver.find_element_by_css_selector(
+                    '.AdaptiveFiltersBar-target.AdaptiveFiltersBar-target--more.u-textUserColor.js-dropdown-toggle').click()
             sleep(1)
             self.driver.find_element_by_css_selector(
                 "a[href*='f=tweets']").click()
@@ -784,7 +789,7 @@ class TwitterBot(object):
             @param tweetbox     {WebElement} Selenium element of tweet
         """
         reply_button = tweetbox.find_element_by_css_selector(
-            '.' + 'ProfileTweet-actionButton u-textUserColorHover js-actionButton js-actionReply'.replace(' ', ','))
+            '.' + 'ProfileTweet-actionButton u-textUserColorHover js-actionButton js-actionReply'.replace(' ', '.'))
         self.logger.info('Clicking reply')
         reply_button.click()
 
@@ -807,7 +812,7 @@ class TwitterBot(object):
 
     def _clickFollow(self, tweetbox):
         """ Click the follow button
-        
+
             First hover over user name
             Then float cursor over to the follow button
             Then press it
