@@ -1026,9 +1026,18 @@ class TwitterBot(object):
             self.settings['tweets'] = float(
                 following[0].text.replace('K', '')) * 1000
         else:
-            self.settings['tweets'] = int(following[0].text.replace(',', ''))
-        self.settings['following'] = int(following[1].text.replace(',', ''))
-        self.settings['followers'] = int(following[2].text.replace(',', ''))
+            try:
+                self.settings['tweets'] = int(following[0].text.replace(',', ''))
+            catch:
+                self.settings['tweets'] = -1
+        try:
+            self.settings['following'] = int(following[1].text.replace(',', ''))
+        catch:
+            self.settings['following'] = -1
+        try:
+            self.settings['followers'] = int(following[2].text.replace(',', ''))
+        catch:
+            self.settings['followers'] = -1
         self.logger.debug('Tweets: %s, Following: %s, Followers %s' % (
             following[0].text, following[1].text, following[2].text))
         with open(self.settings['file'], 'w') as f:
