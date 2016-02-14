@@ -1038,8 +1038,11 @@ class TwitterBot(object):
             self.settings['followers'] = int(following[2].text.replace(',', ''))
         except:
             self.settings['followers'] = -1
-        self.logger.debug('Tweets: %s, Following: %s, Followers %s' % (
-            following[0].text, following[1].text, following[2].text))
+        try:
+            self.logger.debug('Tweets: %s, Following: %s, Followers %s' % (
+                following[0].text, following[1].text, following[2].text))
+        except:
+            pass
         with open(self.settings['file'], 'w') as f:
             f.write(json.dumps(self.settings, indent=4))
 
