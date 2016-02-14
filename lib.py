@@ -1028,15 +1028,15 @@ class TwitterBot(object):
         else:
             try:
                 self.settings['tweets'] = int(following[0].text.replace(',', ''))
-            catch:
+            except:
                 self.settings['tweets'] = -1
         try:
             self.settings['following'] = int(following[1].text.replace(',', ''))
-        catch:
+        except:
             self.settings['following'] = -1
         try:
             self.settings['followers'] = int(following[2].text.replace(',', ''))
-        catch:
+        except:
             self.settings['followers'] = -1
         self.logger.debug('Tweets: %s, Following: %s, Followers %s' % (
             following[0].text, following[1].text, following[2].text))
